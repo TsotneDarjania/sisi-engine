@@ -1,10 +1,12 @@
 import { Application, Sprite, Texture } from "pixi.js";
+import { SceneIndicators } from "./sceneControllers/sceneControllers";
 
 export class EngineScene {
   private app!: Application;
   private parentDIV!: HTMLDivElement;
+  private sceneIndicators!: SceneIndicators;
 
-  private canvasBackgroundColor: string = "#242424";
+  private canvasBackgroundColor: string = "#101828";
 
   get backgroundColor() {
     return this.canvasBackgroundColor;
@@ -21,9 +23,17 @@ export class EngineScene {
       background: this.canvasBackgroundColor,
       resizeTo: this.parentDIV,
     });
+    this.app.renderer.on("resize", this.onResize.bind(this));
     this.parentDIV.appendChild(this.app.canvas);
+    this.addSceneIndicators();
+  }
 
-    console.log(this.app.renderer.resolution);
+  public addSceneIndicators() {
+    this.sceneIndicators = new SceneIndicators(
+      this.app.stage,
+      this.app.renderer.width,
+      this.app.renderer.height
+    );
   }
 
   public async addGameObject(srcURL: string) {
@@ -46,5 +56,14 @@ export class EngineScene {
     this.app.stage.addChild(sprite);
 
     return sprite;
+  }
+
+  private onResize() {
+    if (this.sceneIndicators) {
+      this.sceneIndicators.onResize(
+        this.app.renderer.width,
+        this.app.renderer.height
+      );
+    }
   }
 }

@@ -1,8 +1,8 @@
 import JSZip from "jszip";
-import { Builder } from "../builder";
-import Assets, { AssetType } from "./assets";
-import { EngineScene } from "./engineScene";
-import { Inspector } from "./inspector";
+import { Builder } from "./builder";
+import Assets, { AssetType } from "./engine/assets";
+import { EngineScene } from "./engine/engineScene";
+import { Inspector } from "./engine/inspector";
 import { saveAs } from "file-saver";
 import { Sprite } from "pixi.js";
 
@@ -21,6 +21,10 @@ export default class GameEngine {
 
   get sceneName() {
     return this.currentSceneName;
+  }
+
+  get canvas() {
+    return this.engineScene.parentDiv;
   }
 
   private init() {
@@ -86,19 +90,32 @@ export default class GameEngine {
     this.assets.addNewAsset(file);
   }
 
-  public async build() {
+  public deleteAsset(assetName: string) {
+    this.assets.deleteAsset(assetName);
+  }
+
+  public deleteObject(objName: string) {
+    this.inspector.deleteObject(objName);
+  }
+
+  public async build(
+    width: number,
+    height: number,
+    isFullScreenWidth: boolean,
+    isFullScreenHeight: boolean
+  ) {
     const sceneJson = this.builder.generateJSON(
       this.inspector.AllObject,
       {
         backgroundColor: this.engineScene.backgroundColor,
       },
       {
-        width: this.engineScene.parentDiv.clientWidth,
-        height: this.engineScene.parentDiv.clientHeight,
+        width,
+        height,
+        isFullScreenWidth,
+        isFullScreenHeight,
       }
     );
-
-    console.log(sceneJson);
 
     const zip = new JSZip();
 

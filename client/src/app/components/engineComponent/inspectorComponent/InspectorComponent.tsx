@@ -1,15 +1,20 @@
 "use client";
 
-import GameEngine from "@/app/core/engine";
+import GameEngine from "@/app/core";
 import { InspectorObjectType } from "@/app/core/engine/inspector";
-import { Fragment, useState } from "react";
+import { MdDeleteForever } from "react-icons/md";
+import { FaArrowRight } from "react-icons/fa";
+import PropertiesComponent from "./components/propterties";
+import { useState } from "react";
 
 export default function InspectorComponent({
   objects,
   gameEngine,
+  updateInspectorObjects,
 }: {
   objects: InspectorObjectType[];
   gameEngine: GameEngine;
+  updateInspectorObjects: () => void;
 }) {
   const changeObjectParameter = (
     parameter: string,
@@ -22,125 +27,69 @@ export default function InspectorComponent({
     });
   };
 
+  const [openObjects, setOpenObjects] = useState<number[]>([]);
+
+  function toggle(index: number) {
+    const newArr = openObjects.includes(index)
+      ? openObjects.filter((item) => item !== index)
+      : [...openObjects, index];
+    setOpenObjects(newArr);
+  }
+
+  function deleteObject(objName: string, openIndex: number) {
+    const newArr = openObjects.filter((index) => index !== openIndex);
+    setOpenObjects(newArr);
+    gameEngine.deleteObject(objName);
+    updateInspectorObjects();
+  }
+
   return (
-    <aside className="flex items-center flex-col border-2 border-gray-700 p-5">
-      <h2>Inspector</h2>
-      <ul className="w-full">
-        {objects.map((object) => (
-          <Fragment key={object.name}>
-            <li className="flex items-center justify-between gap-2">
+    <aside className="flex items-center h-screen flex-col border-2 border-gray-700">
+      <header className="bg-gray-900 flex justify-center items-center border-white border-2 border-l-0 border-r-0 border-t-0 w-full p-4">
+        <h2 className="text-xl custom-font-1 text-white ">Inspector</h2>
+      </header>
+
+      <ul className="w-full h-full flex-grow  overflow-y-auto">
+        {objects.map((object, index) => (
+          <li
+            key={object.name}
+            className="border-2 border-white border-t-0 border-l-0 border-r-0 p-2 bg-gray-900 text-white"
+          >
+            <header className="flex items-center justify-between gap-2 ">
               <p>{object.type}</p>
               <p>{object.name}</p>
-            </li>
-            <ul className="w-full bg-gray-600 p-2 text-white">
-              <li className="flex justify-between">
-                <label>Scale :</label>
-                <input
-                  className="text-center border"
-                  defaultValue={object.gameObject.scale.x}
-                  type="number"
-                  onChange={(e) => {
-                    changeObjectParameter(
-                      "scale",
-                      object.name,
-                      e.currentTarget.value
-                    );
+
+              {/* Controllers */}
+              <div className="flex justify-center items-center">
+                {/* Arrow */}
+                <FaArrowRight
+                  onClick={() => {
+                    toggle(index);
                   }}
+                  fontSize={"21px"}
+                  className={`cursor-pointer transition-all ${
+                    openObjects.includes(index) ? "rotate-90" : ""
+                  }`}
                 />
-              </li>
-              <li className="flex justify-between">
-                <label>Pos X :</label>
-                <input
-                  className="text-center border"
-                  defaultValue={object.gameObject.x}
-                  type="number"
-                  onChange={(e) => {
-                    changeObjectParameter(
-                      "x",
-                      object.name,
-                      e.currentTarget.value
-                    );
+                {/* Delete */}
+                <MdDeleteForever
+                  onClick={() => {
+                    deleteObject(object.name, index);
                   }}
+                  className="cursor-pointer"
+                  fontSize={"30px"}
                 />
-              </li>
-              <li className="flex justify-between">
-                <label>Pos Y :</label>
-                <input
-                  className="text-center border"
-                  defaultValue={object.gameObject.y}
-                  type="number"
-                  onChange={(e) => {
-                    changeObjectParameter(
-                      "y",
-                      object.name,
-                      e.currentTarget.value
-                    );
-                  }}
-                />
-              </li>
-              <li className="flex justify-between">
-                <label>Width :</label>
-                <input
-                  className="text-center border"
-                  defaultValue={object.gameObject.width}
-                  type="number"
-                  onChange={(e) => {
-                    changeObjectParameter(
-                      "width",
-                      object.name,
-                      e.currentTarget.value
-                    );
-                  }}
-                />
-              </li>
-              <li className="flex justify-between">
-                <label>Height :</label>
-                <input
-                  className="text-center border"
-                  defaultValue={object.gameObject.height}
-                  type="number"
-                  onChange={(e) => {
-                    changeObjectParameter(
-                      "height",
-                      object.name,
-                      e.currentTarget.value
-                    );
-                  }}
-                />
-              </li>
-              <li className="flex justify-between">
-                <label>Opacity :</label>
-                <input
-                  className="text-center border"
-                  defaultValue={object.gameObject.alpha}
-                  type="number"
-                  onChange={(e) => {
-                    changeObjectParameter(
-                      "opacity",
-                      object.name,
-                      e.currentTarget.value
-                    );
-                  }}
-                />
-              </li>
-              <li className="flex justify-between">
-                <label>Visible :</label>
-                <input
-                  className="text-center border"
-                  defaultChecked={object.gameObject.visible}
-                  // checked={object.gameObject.visible}
-                  type="checkbox"
-                  onChange={(e) => {
-                    changeObjectParameter(
-                      "visible",
-                      object.name,
-                      e.currentTarget.checked
-                    );
-                  }}
-                />
-              </li>
-            </ul>
-          </Fragment>
+              </div>
+            </header>
+
+            {/* Inspector Components */}
+            {openObjects.includes(index) && (
+              <PropertiesComponent
+                changeObjectParameter={changeObjectParameter}
+                obj={object}
+              />
+            )}
+          </li>
         ))}
       </ul>
     </aside>

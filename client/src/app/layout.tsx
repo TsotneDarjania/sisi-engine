@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const sansCodeFont = localFont({
+  src: "./fonts/sans-code/GoogleSansCode-VariableFont_wght.ttf",
 });
+
+// const geistSans = Geist({
+//   variable: "--font-geist-sans",
+//   subsets: ["latin"],
+// });
 
 export const metadata: Metadata = {
   title: "Pixi Game Engine",
@@ -17,9 +21,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  console.log(sansCodeFont.className);
   return (
     <html lang="en">
-      <body className={`${geistSans.variable}  antialiased`}>{children}</body>
+      <body className={`${sansCodeFont.className} antialiased`}>
+        {children}
+      </body>
     </html>
   );
 }

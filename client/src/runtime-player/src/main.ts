@@ -22,6 +22,8 @@ export type GenerateBuildJSONType = {
   appElement: {
     width: number;
     height: number;
+    isFullScreenWidth: boolean;
+    isFullScreenHeight: boolean;
   };
 };
 
@@ -30,8 +32,12 @@ export type GenerateBuildJSONType = {
 
   const response = await fetch("./scene.json");
   const sceneData = (await response.json()) as GenerateBuildJSONType;
-  appElement.style.width = `${sceneData.appElement.width}px`;
-  appElement.style.height = `${sceneData.appElement.height}px`;
+  appElement.style.width = sceneData.appElement.isFullScreenWidth
+    ? "100vw"
+    : `${sceneData.appElement.width}px`;
+  appElement.style.height = sceneData.appElement.isFullScreenHeight
+    ? "100vh"
+    : `${sceneData.appElement.height}px`;
 
   const uniqueAssets = [...new Set(sceneData.objects.map((obj) => obj.src))];
 

@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
-import EngineScene from "..";
+import EngineScene from "../..";
 import { ContainerChild } from "pixi.js";
 
 export type InspectorObjectType = {
@@ -14,7 +14,15 @@ export type InspectorObjectType = {
 export class Inspector {
   objects: Array<InspectorObjectType> = [];
 
-  constructor() {}
+  public deleteObject(name: string) {
+    this.objects = this.objects.filter((obj) => {
+      if (obj.name === name) {
+        obj.gameObject.destroy(true);
+      }
+
+      return obj.name !== name;
+    });
+  }
 
   public addObject(
     type: string,
