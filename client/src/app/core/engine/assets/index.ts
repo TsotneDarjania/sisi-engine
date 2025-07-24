@@ -8,6 +8,10 @@ export type AssetType = {
 export default class Assets {
   private assets: Record<string, AssetType> = {};
 
+  public deleteAsset(name: string) {
+    delete this.assets[name];
+  }
+
   public addNewAsset(file: File) {
     const blobURL = URL.createObjectURL(file);
 

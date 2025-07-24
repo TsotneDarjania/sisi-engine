@@ -2,10 +2,11 @@
 
 import { MdDeleteForever } from "react-icons/md";
 import { IoMdMove } from "react-icons/io";
+import { IoAddCircleOutline } from "react-icons/io5";
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import GameEngine from "@/app/core/engine";
+import GameEngine from "@/app/core";
 import { AssetType } from "@/app/core/engine/assets";
 
 export default function AssetsComponent({
@@ -16,15 +17,13 @@ export default function AssetsComponent({
   const inputRef = useRef<HTMLInputElement>(null);
   const [assets, setAssets] = useState<AssetType[]>([]);
 
-  console.log("re render");
-
   function handleAddAsset() {
     inputRef.current?.click();
   }
 
   function handleAssetDelete(assetName: string) {
-    const newArr = assets.filter((asset) => asset.name !== assetName);
-    setAssets(newArr);
+    gameEngine.deleteAsset(assetName);
+    setAssets(gameEngine.getAllAsset());
   }
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -37,15 +36,17 @@ export default function AssetsComponent({
   }
 
   return (
-    <aside className="flex flex-col items-center border-2 p-5">
-      <h2>Assets</h2>
+    <aside className="flex items-center h-screen flex-col border-2 border-gray-700">
+      <header className="bg-gray-900 flex justify-center items-center border-white border-2 border-l-0 border-r-0 border-t-0 w-full p-4">
+        <h2 className="text-xl custom-font-1 text-white ">Assets</h2>
+      </header>
       <ul className="flex flex-col items-center w-full">
         {assets.map((asset) => (
           <li
             key={asset.name}
-            className="text-sm w-full truncate justify-between flex items-center border p-2"
+            className="text-sm w-full truncate justify-between flex items-center border pt-2 pb-2 border-l-0 border-r-0 border-t-0"
           >
-            <div className=" flex items-center h-full gap-2">
+            <div className=" gap-2 flex items-center h-full">
               {/* Type */}
               <p className=" text-gray-800 font-bold">{asset.type}</p>
               {/* Name */}
@@ -105,12 +106,12 @@ export default function AssetsComponent({
             className="hidden"
             type="file"
           ></input>
-          <button
+
+          <IoAddCircleOutline
+            fontSize={"50px"}
+            className="w-full flex justify-center items-center cursor-pointer"
             onClick={handleAddAsset}
-            className="border-2 h-[40px] w-full text-2xl border-gray-700 flex justify-center items-center cursor-pointer mt-2"
-          >
-            +
-          </button>
+          />
         </li>
       </ul>
     </aside>

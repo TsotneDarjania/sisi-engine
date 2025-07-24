@@ -9,6 +9,8 @@ export class Builder {
     appElement: {
       width: number;
       height: number;
+      isFullScreenWidth: boolean;
+      isFullScreenHeight: boolean;
     }
   ) {
     const sceneObjects = objects.map((obj) => ({

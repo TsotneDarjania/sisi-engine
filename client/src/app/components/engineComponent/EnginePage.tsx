@@ -4,8 +4,9 @@ import AssetsComponent from "@/app/components/engineComponent/assetsComponent/As
 import SceneComponent from "./sceneComponent/SceneComponent";
 import InspectorComponent from "./inspectorComponent/InspectorComponent";
 import { useEffect, useRef, useState } from "react";
-import GameEngine from "@/app/core/engine";
+import GameEngine from "@/app/core";
 import { InspectorObjectType } from "@/app/core/engine/inspector";
+import BuildSettingsComponent from "./buildSettingsComponent/BuildSettinsComponent";
 
 export default function EngineComponent() {
   const gameEngine = useRef<GameEngine | null>(null);
@@ -37,7 +38,11 @@ export default function EngineComponent() {
         gameEngine={gameEngine.current}
       />
       {/* Inspector */}
-      <InspectorComponent gameEngine={gameEngine.current} objects={objects} />
+      <InspectorComponent
+        updateInspectorObjects={updateInspectorObjects}
+        gameEngine={gameEngine.current}
+        objects={objects}
+      />
     </div>
   );
 }
