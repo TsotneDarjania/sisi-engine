@@ -1,4 +1,9 @@
+"use client";
+
 import { InspectorObjectType } from "@/app/core/engine/inspector";
+import { useState } from "react";
+import { FaArrowRight } from "react-icons/fa";
+import InspectorObjectComponent from "../inspectorObjectComponent";
 
 export type PropertiesComponentType = {
   obj: InspectorObjectType;
@@ -10,6 +15,12 @@ export type PropertiesComponentType = {
 };
 
 export default function PropertiesComponent(props: PropertiesComponentType) {
+  const [isChildsOpen, setIsChildsOpen] = useState(false);
+
+  function toggle() {
+    setIsChildsOpen((prev) => !prev);
+  }
+
   return (
     <ul className="w-full text-white mt-3 transition-all">
       <li className="flex justify-between">
@@ -107,7 +118,6 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
         <input
           className="text-center border"
           defaultChecked={props.obj.gameObject.visible}
-          // checked={object.gameObject.visible}
           type="checkbox"
           onChange={(e) => {
             props.changeObjectParameter(
@@ -118,6 +128,30 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
           }}
         />
       </li>
+      {props.obj.childs.length > 0 && (
+        <>
+          <li className="flex justify-between">
+            <label>Childs : </label>
+            <div className="flex items-center gap-2">
+              <p>{props.obj.childs.length}</p>
+              {/* Arrow */}
+              <FaArrowRight
+                onClick={() => {
+                  toggle();
+                }}
+                fontSize={"21px"}
+                className={`cursor-pointer transition-all ${
+                  isChildsOpen ? "rotate-90" : ""
+                }`}
+              />
+            </div>
+          </li>
+          {isChildsOpen &&
+            props.obj.childs.map((obj, key) => (
+              <InspectorObjectComponent key={key} object={obj} />
+            ))}
+        </>
+      )}
     </ul>
   );
 }

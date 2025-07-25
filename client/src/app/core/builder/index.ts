@@ -1,6 +1,24 @@
 import { InspectorObjectType } from "../engine/inspector";
 
 export class Builder {
+  private mapObjectToJSON(obj: InspectorObjectType): any {
+    return {
+      type: obj.type,
+      src: `/game-assets/${obj.assetSRC}`,
+      childs: obj.childs.map((child) => this.mapObjectToJSON(child)), // ✅ recursion
+      data: {
+        x: obj.gameObject.x,
+        y: obj.gameObject.y,
+        scale: obj.gameObject.scale._x,
+        width: obj.gameObject.width,
+        height: obj.gameObject.height,
+        alpha: obj.gameObject.alpha,
+        isActive: obj.gameObject.visible,
+      },
+      scene: obj.scene,
+    };
+  }
+
   public generateJSON(
     objects: InspectorObjectType[],
     canvas: {
@@ -13,20 +31,7 @@ export class Builder {
       isFullScreenHeight: boolean;
     }
   ) {
-    const sceneObjects = objects.map((obj) => ({
-      type: obj.type,
-      src: `/game-assets/${obj.assetSRC}`,
-      data: {
-        x: obj.gameObject.x,
-        y: obj.gameObject.y,
-        scale: obj.gameObject.scale._x,
-        width: obj.gameObject.width,
-        height: obj.gameObject.height,
-        alpha: obj.gameObject.alpha,
-        isActive: obj.gameObject.visible,
-      },
-      scene: obj.scene,
-    }));
+    const sceneObjects = objects.map((obj) => this.mapObjectToJSON(obj));
 
     const json = {
       objects: sceneObjects,

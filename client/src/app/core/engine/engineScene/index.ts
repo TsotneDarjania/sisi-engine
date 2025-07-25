@@ -1,4 +1,10 @@
-import { Application, Sprite, Texture } from "pixi.js";
+import {
+  Application,
+  Container,
+  ContainerChild,
+  Sprite,
+  Texture,
+} from "pixi.js";
 import { SceneIndicators } from "./sceneControllers/sceneControllers";
 
 export class EngineScene {
@@ -14,6 +20,10 @@ export class EngineScene {
 
   get parentDiv() {
     return this.parentDIV;
+  }
+
+  get stage() {
+    return this.app.stage;
   }
 
   public async init(parentDIV: HTMLDivElement) {

@@ -2,9 +2,9 @@ import JSZip from "jszip";
 import { Builder } from "./builder";
 import Assets, { AssetType } from "./engine/assets";
 import { EngineScene } from "./engine/engineScene";
-import { Inspector } from "./engine/inspector";
+import { Inspector, InspectorObjectType } from "./engine/inspector";
 import { saveAs } from "file-saver";
-import { Sprite } from "pixi.js";
+import { Container, ContainerChild, Sprite } from "pixi.js";
 
 export default class GameEngine {
   private assets!: Assets;
@@ -94,8 +94,23 @@ export default class GameEngine {
     this.assets.deleteAsset(assetName);
   }
 
+  public combineInspectorObjects(
+    child: InspectorObjectType,
+    parent: InspectorObjectType
+  ) {
+    this.inspector.combineObject(child, parent);
+  }
+
+  public removeFromParent(childObject: InspectorObjectType) {
+    this.inspector.removeFromParent(childObject, this.engineScene.stage);
+  }
+
   public deleteObject(objName: string) {
     this.inspector.deleteObject(objName);
+  }
+
+  public findObjectByName(name: string) {
+    return this.inspector.findObjectByName(name);
   }
 
   public async build(
@@ -116,6 +131,8 @@ export default class GameEngine {
         isFullScreenHeight,
       }
     );
+
+    console.log(sceneJson);
 
     const zip = new JSZip();
 
