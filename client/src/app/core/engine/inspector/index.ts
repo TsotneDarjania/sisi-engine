@@ -1,5 +1,3 @@
-import { Dispatch, SetStateAction } from "react";
-import EngineScene from "../..";
 import { ContainerChild } from "pixi.js";
 
 export type InspectorObjectType = {
@@ -9,19 +7,107 @@ export type InspectorObjectType = {
   scene: string;
   assetFile: File;
   assetSRC: string;
+  childs: InspectorObjectType[];
 };
 
 export class Inspector {
   objects: Array<InspectorObjectType> = [];
 
-  public deleteObject(name: string) {
-    this.objects = this.objects.filter((obj) => {
-      if (obj.name === name) {
-        obj.gameObject.destroy(true);
+  private removeObjectRecursive(
+    list: InspectorObjectType[],
+    targetName: string
+  ): InspectorObjectType[] {
+    return list
+      .filter((obj) => obj.name !== targetName)
+      .map((obj) => ({
+        ...obj,
+        childs: this.removeObjectRecursive(obj.childs, targetName),
+      }));
+  }
+
+  public combineObject(
+    child: InspectorObjectType,
+    parent: InspectorObjectType
+  ) {
+    // Remove child from tree (this creates new object tree)
+    this.objects = this.removeObjectRecursive(this.objects, child.name);
+
+    // Refetch updated parent from fresh tree
+    const updatedParent = this.findObjectByName(parent.name);
+    if (!updatedParent) {
+      throw new Error("Parent object not found after tree update");
+    }
+
+    // Attach child to updated parent
+    updatedParent.childs.push(child);
+    updatedParent.gameObject.addChild(child.gameObject);
+  }
+
+  private findParentRecursive(
+    list: InspectorObjectType[],
+    childName: string
+  ): InspectorObjectType | null {
+    for (const obj of list) {
+      if (obj.childs.some((child) => child.name === childName)) {
+        return obj;
       }
 
-      return obj.name !== name;
-    });
+      const foundInChild = this.findParentRecursive(obj.childs, childName);
+      if (foundInChild) return foundInChild;
+    }
+
+    return null;
+  }
+
+  public removeFromParent(
+    childObject: InspectorObjectType,
+    mainStage: ContainerChild
+  ): void {
+    const parent = this.findParentRecursive(this.objects, childObject.name);
+
+    if (!parent) {
+      // If not found, it's already a top-level object — do nothing
+      console.warn("Child has no parent. It's already top-level.");
+      return;
+    }
+
+    // Remove from parent's childs array
+    parent.childs = parent.childs.filter(
+      (child) => child.name !== childObject.name
+    );
+
+    // Remove from parent's PIXI container
+    parent.gameObject.removeChild(childObject.gameObject);
+    mainStage.addChild(childObject.gameObject);
+
+    // Optionally: push child to top-level (to make it independent again)
+    this.objects.push(childObject);
+  }
+
+  public deleteObject(name: string) {
+    const target = this.findObjectByName(name);
+    if (!target) {
+      throw new Error("target object is undefined (for delete)");
+    }
+
+    target.gameObject.destroy(true);
+    this.objects = this.removeObjectRecursive(this.objects, name);
+  }
+
+  private getAllObjectsFlatRecursive(
+    list: InspectorObjectType[],
+    result: InspectorObjectType[]
+  ) {
+    for (const obj of list) {
+      result.push(obj);
+      this.getAllObjectsFlatRecursive(obj.childs, result);
+    }
+  }
+
+  private getAllObjectsFlat(): InspectorObjectType[] {
+    const result: InspectorObjectType[] = [];
+    this.getAllObjectsFlatRecursive(this.objects, result);
+    return result;
   }
 
   public addObject(
@@ -34,7 +120,7 @@ export class Inspector {
     let count = 1;
     let fileName = name;
 
-    while (this.objects.find((asset) => asset.name === fileName)) {
+    while (this.getAllObjectsFlat().find((asset) => asset.name === fileName)) {
       fileName = `${name} ${count}`;
       count++;
     }
@@ -46,11 +132,30 @@ export class Inspector {
       scene: sceneName,
       assetFile: file,
       assetSRC: name,
+      childs: [],
     });
   }
 
   get AllObject() {
     return this.objects;
+  }
+
+  private findObjectByNameRecursive(
+    list: InspectorObjectType[],
+    name: string
+  ): InspectorObjectType | null {
+    for (const obj of list) {
+      if (obj.name === name) return obj;
+
+      const foundInChild = this.findObjectByNameRecursive(obj.childs, name);
+      if (foundInChild) return foundInChild;
+    }
+
+    return null;
+  }
+
+  public findObjectByName(name: string): InspectorObjectType | null {
+    return this.findObjectByNameRecursive(this.objects, name);
   }
 
   public changeObject(
@@ -60,9 +165,7 @@ export class Inspector {
       value: string | number | boolean;
     }
   ) {
-    const targetObj = this.objects.find(
-      (obj) => obj.name === objName
-    )?.gameObject;
+    const targetObj = this.findObjectByName(objName)?.gameObject;
 
     if (!targetObj) {
       throw Error("targetObject is undefined");

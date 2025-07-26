@@ -8,12 +8,11 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import GameEngine from "@/app/core";
 import { AssetType } from "@/app/core/engine/assets";
+import useStore from "@/app/store";
 
-export default function AssetsComponent({
-  gameEngine,
-}: {
-  gameEngine: GameEngine;
-}) {
+export default function AssetsComponent() {
+  const gameEngine = useStore((state) => state.gameEngine)!;
+
   const inputRef = useRef<HTMLInputElement>(null);
   const [assets, setAssets] = useState<AssetType[]>([]);
 
@@ -80,8 +79,8 @@ export default function AssetsComponent({
               <div
                 draggable
                 onDragStart={(e) => {
-                  console.log("drag");
                   e.dataTransfer.setData("text/plain", asset.name);
+                  e.dataTransfer.setData("origin", "assets");
                 }}
                 className="cursor-pointer inline-block"
               >

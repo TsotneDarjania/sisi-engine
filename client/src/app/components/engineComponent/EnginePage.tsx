@@ -5,44 +5,32 @@ import SceneComponent from "./sceneComponent/SceneComponent";
 import InspectorComponent from "./inspectorComponent/InspectorComponent";
 import { useEffect, useRef, useState } from "react";
 import GameEngine from "@/app/core";
-import { InspectorObjectType } from "@/app/core/engine/inspector";
-import BuildSettingsComponent from "./buildSettingsComponent/BuildSettinsComponent";
+import useStore from "@/app/store";
 
 export default function EngineComponent() {
-  const gameEngine = useRef<GameEngine | null>(null);
+  const gameEngine = useStore((state) => state.gameEngine);
+  const setGameEngine = useStore((state) => state.setGameEngine);
+
   const [isReady, setIsReady] = useState(false);
 
-  const [objects, setObjects] = useState<InspectorObjectType[]>([]);
-
-  const updateInspectorObjects = () => {
-    const objects = gameEngine.current?.getAllInspectorObject() || [];
-    setObjects(objects.map((obj) => ({ ...obj })));
-  };
-
   useEffect(() => {
-    gameEngine.current = new GameEngine();
+    const engine = new GameEngine();
+    setGameEngine(engine);
     setIsReady(true);
   }, []);
 
-  if (!isReady || !gameEngine.current) {
-    return null; // Optionally render a loading UI here
+  if (!isReady || !gameEngine) {
+    return null;
   }
 
   return (
     <div className="grid grid-cols-[1fr_2fr_1fr] h-screen">
       {/* Assets */}
-      <AssetsComponent gameEngine={gameEngine.current} />
+      <AssetsComponent />
       {/* Scene */}
-      <SceneComponent
-        onObjectAdded={updateInspectorObjects}
-        gameEngine={gameEngine.current}
-      />
+      <SceneComponent />
       {/* Inspector */}
-      <InspectorComponent
-        updateInspectorObjects={updateInspectorObjects}
-        gameEngine={gameEngine.current}
-        objects={objects}
-      />
+      <InspectorComponent />
     </div>
   );
 }

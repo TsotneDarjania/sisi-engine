@@ -1,23 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import GameEngine from "@/app/core";
 import { SlSizeFullscreen } from "react-icons/sl";
 import { AiOutlinePlaySquare } from "react-icons/ai";
 import { FaToolbox } from "react-icons/fa";
 import { FaFileDownload } from "react-icons/fa";
 import BuildSettingsComponent from "../buildSettingsComponent/BuildSettinsComponent";
+import useStore from "@/app/store";
+import useUpdateInspectorObjects from "@/hooks/useupdateInspectorObjects";
 
-export default function SceneComponent({
-  gameEngine,
-  onObjectAdded,
-}: {
-  gameEngine: GameEngine;
-  onObjectAdded: () => void;
-}) {
+export default function SceneComponent() {
+  const gameEngine = useStore((state) => state.gameEngine)!;
   const sceneDivRef = useRef<HTMLDivElement>(null);
   const [isSceneCreated, setIsSceneCreated] = useState(false);
   const [isOpenBuildSettins, setIsOpenBuildSettings] = useState(false);
+  const updateInspectorObjects = useUpdateInspectorObjects();
+  const objects = useStore((state) => state.inspectorObjects);
 
   useEffect(() => {
     const setup = async () => {
@@ -30,6 +28,13 @@ export default function SceneComponent({
 
   const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    const origin = e.dataTransfer.getData("origin");
+
+    if (origin !== "assets") {
+      console.log("Ignored drop from non-assets");
+      return;
+    }
+
     const assetName = e.dataTransfer.getData("text/plain");
     const asset = gameEngine.getAssetByName(assetName);
 
@@ -40,7 +45,8 @@ export default function SceneComponent({
         asset.type,
         asset.file
       );
-      onObjectAdded();
+
+      updateInspectorObjects();
     }
   };
 
