@@ -4,13 +4,15 @@ import { InspectorObjectType } from "@/app/core/engine/inspector";
 import { useState } from "react";
 import { FaArrowRight } from "react-icons/fa";
 import InspectorObjectComponent from "../inspectorObjectComponent";
+import { GameObjectParameterType } from "@/app/core";
+import { Sprite } from "pixi.js";
 
 export type PropertiesComponentType = {
   obj: InspectorObjectType;
   changeObjectParameter: (
-    parameter: string,
+    parameter: GameObjectParameterType,
     objName: string,
-    value: string | number | boolean
+    value: string | number | boolean | [number, number]
   ) => void;
 };
 
@@ -43,7 +45,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
         <input
           className="text-center border"
           defaultValue={props.obj.gameObject.x}
-          type="number"
+          type="string"
           onChange={(e) => {
             props.changeObjectParameter(
               "x",
@@ -58,7 +60,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
         <input
           className="text-center border"
           defaultValue={props.obj.gameObject.y}
-          type="number"
+          type="string"
           onChange={(e) => {
             props.changeObjectParameter(
               "y",
@@ -73,7 +75,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
         <input
           className="text-center border"
           defaultValue={props.obj.gameObject.width}
-          type="number"
+          type="string"
           onChange={(e) => {
             props.changeObjectParameter(
               "width",
@@ -88,7 +90,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
         <input
           className="text-center border"
           defaultValue={props.obj.gameObject.height}
-          type="number"
+          type="string"
           onChange={(e) => {
             props.changeObjectParameter(
               "height",
@@ -97,6 +99,48 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
             );
           }}
         />
+      </li>
+      <li className="flex justify-between">
+        <label>Rotation :</label>
+        <input
+          className="text-center border"
+          defaultValue={props.obj.gameObject.rotation}
+          type="string"
+          onChange={(e) => {
+            props.changeObjectParameter(
+              "rotation",
+              props.obj.name,
+              e.currentTarget.value
+            );
+          }}
+        />
+      </li>
+      <li className="flex justify-between">
+        <label>Ancor :</label>
+        <div className="flex items-center">
+          <input
+            className="text-center border  w-[103px]"
+            defaultValue={(props.obj.gameObject as Sprite).anchor.x}
+            type="number"
+            onChange={(e) => {
+              props.changeObjectParameter("ancor", props.obj.name, [
+                Number(e.currentTarget.value),
+                props.obj.gameObject.pivot.y,
+              ]);
+            }}
+          />
+          <input
+            className="text-center border w-[103px]"
+            defaultValue={(props.obj.gameObject as Sprite).anchor.y}
+            type="number"
+            onChange={(e) => {
+              props.changeObjectParameter("ancor", props.obj.name, [
+                props.obj.gameObject.pivot.x,
+                Number(e.currentTarget.value),
+              ]);
+            }}
+          />
+        </div>
       </li>
       <li className="flex justify-between">
         <label>Opacity :</label>

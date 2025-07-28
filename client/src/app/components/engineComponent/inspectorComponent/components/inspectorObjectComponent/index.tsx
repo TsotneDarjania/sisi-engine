@@ -2,7 +2,10 @@ import { InspectorObjectType } from "@/app/core/engine/inspector";
 import InspectorObjectIndicators from "../indicators";
 import PropertiesComponent from "../propterties";
 import { useState } from "react";
-import GameEngine from "@/app/core";
+import GameEngine, {
+  ChangeOpbjectDataType,
+  GameObjectParameterType,
+} from "@/app/core";
 import useStore from "@/app/store";
 import useUpdateInspectorObjects from "@/hooks/useupdateInspectorObjects";
 
@@ -43,9 +46,9 @@ export default function InspectorObjectComponent({
   }
 
   const changeObjectParameter = (
-    parameter: string,
+    parameter: GameObjectParameterType,
     objName: string,
-    value: string | number | boolean
+    value: string | number | boolean | [number, number]
   ) => {
     gameEngine.changeGameobjectFromInspector(objName, {
       parameter,

@@ -31,7 +31,7 @@ export class SceneIndicators {
     this.stage.addChild(this.sceneNameText);
   }
 
-  public onResize(newWidth: number, newHeight: number) {
+  public onResize(newWidth: number, _newHeight: number) {
     this.sceneNameText.position.set(newWidth / 2);
     this.sceneNameText.y = 30;
   }

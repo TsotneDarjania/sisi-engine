@@ -1,10 +1,4 @@
-import {
-  Application,
-  Container,
-  ContainerChild,
-  Sprite,
-  Texture,
-} from "pixi.js";
+import { Application, Sprite, Texture } from "pixi.js";
 import { SceneIndicators } from "./sceneControllers/sceneControllers";
 
 export class EngineScene {
@@ -26,14 +20,17 @@ export class EngineScene {
     return this.app.stage;
   }
 
-  public async init(parentDIV: HTMLDivElement) {
+  public async init(parentDIV: HTMLDivElement, onResizeCallBack: () => void) {
     this.parentDIV = parentDIV;
     this.app = new Application();
     await this.app.init({
       background: this.canvasBackgroundColor,
       resizeTo: this.parentDIV,
     });
-    this.app.renderer.on("resize", this.onResize.bind(this));
+    this.app.renderer.on("resize", () => {
+      this.onResize();
+      onResizeCallBack();
+    });
     this.parentDIV.appendChild(this.app.canvas);
     this.addSceneIndicators();
   }
@@ -66,6 +63,13 @@ export class EngineScene {
     this.app.stage.addChild(sprite);
 
     return sprite;
+  }
+
+  public getSceneWidthAndHeight() {
+    return {
+      width: this.app.canvas.width,
+      height: this.app.canvas.height,
+    };
   }
 
   private onResize() {

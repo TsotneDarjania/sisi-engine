@@ -4,7 +4,22 @@ import Assets, { AssetType } from "./engine/assets";
 import { EngineScene } from "./engine/engineScene";
 import { Inspector, InspectorObjectType } from "./engine/inspector";
 import { saveAs } from "file-saver";
-import { Container, ContainerChild, Sprite } from "pixi.js";
+
+export type ChangeOpbjectDataType = {
+  parameter: GameObjectParameterType;
+  value: string | number | boolean | [number, number];
+};
+
+export type GameObjectParameterType =
+  | "x"
+  | "y"
+  | "width"
+  | "height"
+  | "scale"
+  | "opacity"
+  | "visible"
+  | "rotation"
+  | "ancor";
 
 export default class GameEngine {
   private assets!: Assets;
@@ -51,7 +66,9 @@ export default class GameEngine {
     }
 
     this.engineScene = new EngineScene();
-    await this.engineScene.init(parentDIV);
+    await this.engineScene.init(parentDIV, () => {
+      this.onGameScreenResize();
+    });
   }
 
   public async addGameObject(
@@ -66,12 +83,10 @@ export default class GameEngine {
 
   public changeGameobjectFromInspector(
     objName: string,
-    data: {
-      parameter: string;
-      value: string | number | boolean;
-    }
+    data: ChangeOpbjectDataType
   ) {
-    this.inspector.changeObject(objName, data);
+    const { width, height } = this.engineScene.getSceneWidthAndHeight();
+    this.inspector.changeObjectParameter(objName, data, width, height);
   }
 
   public getAllAsset(): Array<AssetType> {
@@ -113,6 +128,11 @@ export default class GameEngine {
     return this.inspector.findObjectByName(name);
   }
 
+  public onGameScreenResize() {
+    const { width, height } = this.engineScene.getSceneWidthAndHeight();
+    this.inspector.onGameSceneResize(width, height);
+  }
+
   public async build(
     width: number,
     height: number,
@@ -131,8 +151,6 @@ export default class GameEngine {
         isFullScreenHeight,
       }
     );
-
-    console.log(sceneJson);
 
     const zip = new JSZip();
 

@@ -1,9 +1,21 @@
-import { ContainerChild } from "pixi.js";
+import { ContainerChild, Sprite } from "pixi.js";
+import { ChangeOpbjectDataType } from "../..";
 
 export type InspectorObjectType = {
   type: string;
   name: string;
   gameObject: ContainerChild;
+  sceneData: {
+    x: string;
+    y: string;
+    width: string;
+    height: string;
+    opacity: number;
+    scale: number;
+    isActive: boolean;
+    rotation: number;
+    ancor: [number, number];
+  };
   scene: string;
   assetFile: File;
   assetSRC: string;
@@ -133,6 +145,17 @@ export class Inspector {
       assetFile: file,
       assetSRC: name,
       childs: [],
+      sceneData: {
+        x: String(gameObject.x),
+        y: String(gameObject.y),
+        width: String(gameObject.width),
+        height: String(gameObject.height),
+        scale: gameObject.scale.x,
+        opacity: gameObject.alpha,
+        isActive: gameObject.visible,
+        rotation: gameObject.rotation,
+        ancor: [gameObject.pivot.x, gameObject.pivot.y],
+      },
     });
   }
 
@@ -158,43 +181,142 @@ export class Inspector {
     return this.findObjectByNameRecursive(this.objects, name);
   }
 
-  public changeObject(
-    objName: string,
-    data: {
-      parameter: string;
-      value: string | number | boolean;
+  public onGameSceneResize(sceneWidth: number, sceneHeight: number) {
+    const objects = this.getAllObjectsFlat();
+    for (const obj of objects) {
+      this.changeObjectBulk(obj.name, obj.sceneData, sceneWidth, sceneHeight);
     }
+  }
+
+  public changeObjectBulk(
+    objName: string,
+    sceneData: InspectorObjectType["sceneData"],
+    sceneWidth: number,
+    sceneHeight: number
   ) {
-    const targetObj = this.findObjectByName(objName)?.gameObject;
+    const targetObj = this.findObjectByName(objName);
+    if (!targetObj) {
+      throw new Error("targetObject is undefined");
+    }
+
+    const getNumericValue = (
+      value: string | number,
+      fullSize: number
+    ): number => {
+      if (typeof value === "string" && value.trimEnd().endsWith("%")) {
+        const cleaned = value.trimEnd().replace(/\s+%$/, "%").slice(0, -1);
+        const percent = parseFloat(cleaned);
+        if (!isNaN(percent)) {
+          return (fullSize * percent) / 100;
+        }
+      }
+      return Number(value);
+    };
+
+    // Apply all values from sceneData
+    targetObj.sceneData = { ...sceneData };
+    targetObj.gameObject.x = getNumericValue(sceneData.x, sceneWidth);
+    targetObj.gameObject.y = getNumericValue(sceneData.y, sceneHeight);
+    targetObj.gameObject.width = getNumericValue(sceneData.width, sceneWidth);
+    targetObj.gameObject.height = getNumericValue(
+      sceneData.height,
+      sceneHeight
+    );
+
+    targetObj.gameObject.scale.set(sceneData.scale, sceneData.scale);
+    targetObj.gameObject.alpha = sceneData.opacity;
+    targetObj.gameObject.visible = sceneData.isActive;
+  }
+
+  public changeObjectParameter(
+    objName: string,
+    data: ChangeOpbjectDataType,
+    sceneWidth: number,
+    sceneHeight: number
+  ) {
+    const targetObj = this.findObjectByName(objName);
 
     if (!targetObj) {
-      throw Error("targetObject is undefined");
+      throw new Error("targetObject is undefined");
     }
+
+    // Helper function to support % values
+    const getNumericValue = (
+      value: string | number,
+      fullSize: number
+    ): number => {
+      if (typeof value === "string" && value.trimEnd().endsWith("%")) {
+        const cleaned = value.trimEnd().replace(/\s+%$/, "%").slice(0, -1);
+        const percent = parseFloat(cleaned);
+        if (!isNaN(percent)) {
+          return (fullSize * percent) / 100;
+        }
+      }
+      return Number(value);
+    };
 
     switch (data.parameter) {
       case "scale":
-        targetObj.scale.set(Number(data.value), Number(data.value));
+        targetObj.sceneData.scale = Number(data.value);
+        targetObj.gameObject.scale.set(Number(data.value), Number(data.value));
         break;
+
       case "x":
-        targetObj.x = Number(data.value);
+        targetObj.sceneData.x = String(data.value);
+        targetObj.gameObject.x = getNumericValue(
+          String(data.value),
+          sceneWidth
+        );
         break;
+
       case "y":
-        targetObj.y = Number(data.value);
+        targetObj.sceneData.y = String(data.value);
+        targetObj.gameObject.y = getNumericValue(
+          String(data.value),
+          sceneHeight
+        );
         break;
+
       case "width":
-        targetObj.width = Number(data.value);
+        targetObj.sceneData.width = String(data.value);
+        targetObj.gameObject.width = getNumericValue(
+          String(data.value),
+          sceneWidth
+        );
         break;
+
       case "height":
-        targetObj.height = Number(data.value);
+        targetObj.sceneData.height = String(data.value);
+        targetObj.gameObject.height = getNumericValue(
+          String(data.value),
+          sceneHeight
+        );
         break;
+
       case "opacity":
-        targetObj.alpha = Number(data.value);
+        targetObj.sceneData.opacity = Number(data.value);
+        targetObj.gameObject.alpha = Number(data.value);
         break;
+
       case "visible":
-        targetObj.visible = Boolean(data.value);
+        targetObj.sceneData.isActive = Boolean(data.value);
+        targetObj.gameObject.visible = Boolean(data.value);
         break;
+
+      case "rotation":
+        targetObj.sceneData.rotation = Number(data.value);
+        targetObj.gameObject.rotation = Number(data.value);
+        break;
+
+      case "ancor":
+        targetObj.sceneData.ancor = data.value as [number, number];
+        (targetObj.gameObject as Sprite).anchor.set(
+          ...(data.value as [number, number])
+        );
+        break;
+
       default:
-        console.error("Unknown Parameter : " + data.parameter);
+        console.error("Unknown Parameter:", data.parameter);
     }
   }
 }
