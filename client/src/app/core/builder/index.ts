@@ -1,3 +1,4 @@
+import { Sprite } from "pixi.js";
 import { InspectorObjectType } from "../engine/inspector";
 
 export class Builder {
@@ -14,6 +15,11 @@ export class Builder {
         height: obj.gameObject.height,
         alpha: obj.gameObject.alpha,
         isActive: obj.gameObject.visible,
+        anchor: [
+          (obj.gameObject as Sprite).anchor.x,
+          (obj.gameObject as Sprite).anchor.y,
+        ],
+        rotation: obj.gameObject.rotation,
       },
       scene: obj.scene,
     };

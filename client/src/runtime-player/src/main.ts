@@ -2,22 +2,26 @@ import { Application, Assets, Sprite, Texture, Container } from "pixi.js";
 import { initDevtools } from "@pixi/devtools";
 import { InspectorObjectType } from "../../app/core/engine/inspector";
 
+type ObjectType = {
+  type: string;
+  src: string;
+  childs: InspectorObjectType[];
+  data: {
+    x: number;
+    y: number;
+    scale: number;
+    width: number;
+    height: number;
+    alpha: number;
+    isActive: boolean;
+    anchor: [number, number];
+    rotation: number;
+  };
+  scene: string;
+};
+
 export type GenerateBuildJSONType = {
-  objects: {
-    type: string;
-    src: string;
-    childs: InspectorObjectType[];
-    data: {
-      x: number;
-      y: number;
-      scale: number;
-      width: number;
-      height: number;
-      alpha: number;
-      isActive: boolean;
-    };
-    scene: string;
-  }[];
+  objects: ObjectType[];
   canvas: {
     backgroundColor: string;
   };
@@ -40,7 +44,8 @@ function createSpriteTree(obj: any, parent: Container) {
   sprite.height = obj.data.height;
   sprite.alpha = obj.data.alpha;
   sprite.visible = obj.data.isActive;
-  sprite.anchor.set(0.5);
+  sprite.anchor.set(obj.data.anchor[0], obj.data.anchor[1]);
+  sprite.rotation = obj.data.rotation;
 
   parent.addChild(sprite);
 
