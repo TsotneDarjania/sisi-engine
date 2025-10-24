@@ -1,6 +1,6 @@
 import { Container, ContainerChild, Text } from "pixi.js";
 
-export class SceneIndicators {
+export class SceneMenu {
   private sceneNameText!: Text;
   private sceneName: string = "default";
 

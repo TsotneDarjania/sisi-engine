@@ -1,10 +1,12 @@
 import { Application, Sprite, Texture } from "pixi.js";
-import { SceneIndicators } from "./sceneControllers/sceneControllers";
+import { SceneMenu } from "./sceneMenu/sceneMenu";
+import { SceneControllers } from "./sceneControllers";
 
 export class EngineScene {
   private app!: Application;
   private parentDIV!: HTMLDivElement;
-  private sceneIndicators!: SceneIndicators;
+  private sceneIndicators!: SceneMenu;
+  private sceneControllers! : SceneControllers;
 
   private canvasBackgroundColor: string = "#101828";
 
@@ -33,10 +35,15 @@ export class EngineScene {
     });
     this.parentDIV.appendChild(this.app.canvas);
     this.addSceneIndicators();
+    this.createSceneControllers()
+  }
+
+  private createSceneControllers(){
+    this.sceneControllers = new SceneControllers()
   }
 
   public addSceneIndicators() {
-    this.sceneIndicators = new SceneIndicators(
+    this.sceneIndicators = new SceneMenu(
       this.app.stage,
       this.app.renderer.width,
       this.app.renderer.height

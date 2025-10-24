@@ -4,6 +4,8 @@ import Assets, { AssetType } from "./engine/assets";
 import { EngineScene } from "./engine/engineScene";
 import { Inspector, InspectorObjectType } from "./engine/inspector";
 import { saveAs } from "file-saver";
+import { Signal } from "./state/signal";
+
 
 export type ChangeOpbjectDataType = {
   parameter: GameObjectParameterType;
@@ -28,7 +30,7 @@ export default class GameEngine {
 
   private builder!: Builder;
 
-  private currentSceneName = "default";
+  private currentSceneName = new Signal("default")
 
   constructor() {
     this.init();
@@ -78,7 +80,7 @@ export default class GameEngine {
     file: File
   ) {
     const newObj = await this.engineScene.addGameObject(imgURL);
-    this.inspector.addObject(type, name, newObj, this.currentSceneName, file);
+    this.inspector.addObject(type, name, newObj, this.currentSceneName.value, file);
   }
 
   public changeGameobjectFromInspector(
