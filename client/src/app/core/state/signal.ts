@@ -7,7 +7,7 @@ export class Signal<T> {
     this.listeners = new Set();
   }
 
-  get(): T {
+  get value(): T {
     return this._value;
   }
 
