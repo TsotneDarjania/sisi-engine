@@ -11,15 +11,13 @@ export default function EngineComponent() {
   const gameEngine = useStore((state) => state.gameEngine);
   const setGameEngine = useStore((state) => state.setGameEngine);
 
-  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     const engine = new GameEngine();
     setGameEngine(engine);
-    setIsReady(true);
   }, []);
 
-  if (!isReady || !gameEngine) {
+  if (!gameEngine) {
     return null;
   }
 

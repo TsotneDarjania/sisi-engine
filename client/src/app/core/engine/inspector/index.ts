@@ -1,322 +1,314 @@
 import { ContainerChild, Sprite } from "pixi.js";
-import { ChangeOpbjectDataType } from "../..";
+import EventManager from "../../eventManager";
+import { GameObjectType } from "@/types/engineTypes";
 
-export type InspectorObjectType = {
-  type: string;
-  name: string;
-  gameObject: ContainerChild;
-  sceneData: {
-    x: string;
-    y: string;
-    width: string;
-    height: string;
-    opacity: number;
-    scale: number;
-    isActive: boolean;
-    rotation: number;
-    ancor: [number, number];
-  };
-  scene: string;
-  assetFile: File;
-  assetSRC: string;
-  childs: InspectorObjectType[];
-};
+
 
 export class Inspector {
-  objects: Array<InspectorObjectType> = [];
+  private gameObjects: Array<GameObjectType> = [];
 
-  private removeObjectRecursive(
-    list: InspectorObjectType[],
-    targetName: string
-  ): InspectorObjectType[] {
-    return list
-      .filter((obj) => obj.name !== targetName)
-      .map((obj) => ({
-        ...obj,
-        childs: this.removeObjectRecursive(obj.childs, targetName),
-      }));
+  
+  constructor(public eventManager : EventManager){
+
   }
 
-  public combineObject(
-    child: InspectorObjectType,
-    parent: InspectorObjectType
-  ) {
-    // Remove child from tree (this creates new object tree)
-    this.objects = this.removeObjectRecursive(this.objects, child.name);
+  addGameObject(){
 
-    // Refetch updated parent from fresh tree
-    const updatedParent = this.findObjectByName(parent.name);
-    if (!updatedParent) {
-      throw new Error("Parent object not found after tree update");
-    }
-
-    // Attach child to updated parent
-    updatedParent.childs.push(child);
-    updatedParent.gameObject.addChild(child.gameObject);
   }
 
-  private findParentRecursive(
-    list: InspectorObjectType[],
-    childName: string
-  ): InspectorObjectType | null {
-    for (const obj of list) {
-      if (obj.childs.some((child) => child.name === childName)) {
-        return obj;
-      }
 
-      const foundInChild = this.findParentRecursive(obj.childs, childName);
-      if (foundInChild) return foundInChild;
-    }
+  // private removeObjectRecursive(
+  //   list: InspectorObjectType[],
+  //   targetName: string
+  // ): InspectorObjectType[] {
+  //   return list
+  //     .filter((obj) => obj.name !== targetName)
+  //     .map((obj) => ({
+  //       ...obj,
+  //       childs: this.removeObjectRecursive(obj.childs, targetName),
+  //     }));
+  // }
 
-    return null;
-  }
+  // public combineObject(
+  //   child: InspectorObjectType,
+  //   parent: InspectorObjectType
+  // ) {
+  //   // Remove child from tree (this creates new object tree)
+  //   this.objects = this.removeObjectRecursive(this.objects, child.name);
 
-  public removeFromParent(
-    childObject: InspectorObjectType,
-    mainStage: ContainerChild
-  ): void {
-    const parent = this.findParentRecursive(this.objects, childObject.name);
+  //   // Refetch updated parent from fresh tree
+  //   const updatedParent = this.findObjectByName(parent.name);
+  //   if (!updatedParent) {
+  //     throw new Error("Parent object not found after tree update");
+  //   }
 
-    if (!parent) {
-      // If not found, it's already a top-level object — do nothing
-      console.warn("Child has no parent. It's already top-level.");
-      return;
-    }
+  //   // Attach child to updated parent
+  //   updatedParent.childs.push(child);
+  //   updatedParent.gameObject.addChild(child.gameObject);
+  // }
 
-    // Remove from parent's childs array
-    parent.childs = parent.childs.filter(
-      (child) => child.name !== childObject.name
-    );
+  // private findParentRecursive(
+  //   list: InspectorObjectType[],
+  //   childName: string
+  // ): InspectorObjectType | null {
+  //   for (const obj of list) {
+  //     if (obj.childs.some((child) => child.name === childName)) {
+  //       return obj;
+  //     }
 
-    // Remove from parent's PIXI container
-    parent.gameObject.removeChild(childObject.gameObject);
-    mainStage.addChild(childObject.gameObject);
+  //     const foundInChild = this.findParentRecursive(obj.childs, childName);
+  //     if (foundInChild) return foundInChild;
+  //   }
 
-    // Optionally: push child to top-level (to make it independent again)
-    this.objects.push(childObject);
-  }
+  //   return null;
+  // }
 
-  public deleteObject(name: string) {
-    const target = this.findObjectByName(name);
-    if (!target) {
-      throw new Error("target object is undefined (for delete)");
-    }
+  // public removeFromParent(
+  //   childObject: InspectorObjectType,
+  //   mainStage: ContainerChild
+  // ): void {
+  //   const parent = this.findParentRecursive(this.objects, childObject.name);
 
-    target.gameObject.destroy(true);
-    this.objects = this.removeObjectRecursive(this.objects, name);
-  }
+  //   if (!parent) {
+  //     // If not found, it's already a top-level object — do nothing
+  //     console.warn("Child has no parent. It's already top-level.");
+  //     return;
+  //   }
 
-  private getAllObjectsFlatRecursive(
-    list: InspectorObjectType[],
-    result: InspectorObjectType[]
-  ) {
-    for (const obj of list) {
-      result.push(obj);
-      this.getAllObjectsFlatRecursive(obj.childs, result);
-    }
-  }
+  //   // Remove from parent's childs array
+  //   parent.childs = parent.childs.filter(
+  //     (child) => child.name !== childObject.name
+  //   );
 
-  private getAllObjectsFlat(): InspectorObjectType[] {
-    const result: InspectorObjectType[] = [];
-    this.getAllObjectsFlatRecursive(this.objects, result);
-    return result;
-  }
+  //   // Remove from parent's PIXI container
+  //   parent.gameObject.removeChild(childObject.gameObject);
+  //   mainStage.addChild(childObject.gameObject);
 
-  public addObject(
-    type: string,
-    name: string,
-    gameObject: ContainerChild,
-    sceneName: string,
-    file: File
-  ) {
-    let count = 1;
-    let fileName = name;
+  //   // Optionally: push child to top-level (to make it independent again)
+  //   this.objects.push(childObject);
+  // }
 
-    while (this.getAllObjectsFlat().find((asset) => asset.name === fileName)) {
-      fileName = `${name} ${count}`;
-      count++;
-    }
+  // public deleteObject(name: string) {
+  //   const target = this.findObjectByName(name);
+  //   if (!target) {
+  //     throw new Error("target object is undefined (for delete)");
+  //   }
 
-    this.objects.push({
-      type,
-      name: fileName,
-      gameObject,
-      scene: sceneName,
-      assetFile: file,
-      assetSRC: name,
-      childs: [],
-      sceneData: {
-        x: String(gameObject.x),
-        y: String(gameObject.y),
-        width: String(gameObject.width),
-        height: String(gameObject.height),
-        scale: gameObject.scale.x,
-        opacity: gameObject.alpha,
-        isActive: gameObject.visible,
-        rotation: gameObject.rotation,
-        ancor: [gameObject.pivot.x, gameObject.pivot.y],
-      },
-    });
-  }
+  //   target.gameObject.destroy(true);
+  //   this.objects = this.removeObjectRecursive(this.objects, name);
+  // }
 
-  get AllObject() {
-    return this.objects;
-  }
+  // private getAllObjectsFlatRecursive(
+  //   list: InspectorObjectType[],
+  //   result: InspectorObjectType[]
+  // ) {
+  //   for (const obj of list) {
+  //     result.push(obj);
+  //     this.getAllObjectsFlatRecursive(obj.childs, result);
+  //   }
+  // }
 
-  private findObjectByNameRecursive(
-    list: InspectorObjectType[],
-    name: string
-  ): InspectorObjectType | null {
-    for (const obj of list) {
-      if (obj.name === name) return obj;
+  // private getAllObjectsFlat(): InspectorObjectType[] {
+  //   const result: InspectorObjectType[] = [];
+  //   this.getAllObjectsFlatRecursive(this.objects, result);
+  //   return result;
+  // }
 
-      const foundInChild = this.findObjectByNameRecursive(obj.childs, name);
-      if (foundInChild) return foundInChild;
-    }
+  // public addObject(
+  //   type: string,
+  //   name: string,
+  //   gameObject: ContainerChild,
+  //   sceneName: string,
+  //   file: File
+  // ) {
+  //   let count = 1;
+  //   let fileName = name;
 
-    return null;
-  }
+  //   while (this.getAllObjectsFlat().find((asset) => asset.name === fileName)) {
+  //     fileName = `${name} ${count}`;
+  //     count++;
+  //   }
 
-  public findObjectByName(name: string): InspectorObjectType | null {
-    return this.findObjectByNameRecursive(this.objects, name);
-  }
+  //   this.objects.push({
+  //     type,
+  //     name: fileName,
+  //     gameObject,
+  //     scene: sceneName,
+  //     assetFile: file,
+  //     assetSRC: name,
+  //     childs: [],
+  //     sceneData: {
+  //       x: String(gameObject.x),
+  //       y: String(gameObject.y),
+  //       width: String(gameObject.width),
+  //       height: String(gameObject.height),
+  //       scale: gameObject.scale.x,
+  //       opacity: gameObject.alpha,
+  //       isActive: gameObject.visible,
+  //       rotation: gameObject.rotation,
+  //       ancor: [gameObject.pivot.x, gameObject.pivot.y],
+  //     },
+  //   });
+  // }
 
-  public onGameSceneResize(sceneWidth: number, sceneHeight: number) {
-    const objects = this.getAllObjectsFlat();
-    for (const obj of objects) {
-      this.changeObjectBulk(obj.name, obj.sceneData, sceneWidth, sceneHeight);
-    }
-  }
+  // get AllObject() {
+  //   return this.objects;
+  // }
 
-  public changeObjectBulk(
-    objName: string,
-    sceneData: InspectorObjectType["sceneData"],
-    sceneWidth: number,
-    sceneHeight: number
-  ) {
-    const targetObj = this.findObjectByName(objName);
-    if (!targetObj) {
-      throw new Error("targetObject is undefined");
-    }
+  // private findObjectByNameRecursive(
+  //   list: InspectorObjectType[],
+  //   name: string
+  // ): InspectorObjectType | null {
+  //   for (const obj of list) {
+  //     if (obj.name === name) return obj;
 
-    const getNumericValue = (
-      value: string | number,
-      fullSize: number
-    ): number => {
-      if (typeof value === "string" && value.trimEnd().endsWith("%")) {
-        const cleaned = value.trimEnd().replace(/\s+%$/, "%").slice(0, -1);
-        const percent = parseFloat(cleaned);
-        if (!isNaN(percent)) {
-          return (fullSize * percent) / 100;
-        }
-      }
-      return Number(value);
-    };
+  //     const foundInChild = this.findObjectByNameRecursive(obj.childs, name);
+  //     if (foundInChild) return foundInChild;
+  //   }
 
-    // Apply all values from sceneData
-    targetObj.sceneData = { ...sceneData };
-    targetObj.gameObject.x = getNumericValue(sceneData.x, sceneWidth);
-    targetObj.gameObject.y = getNumericValue(sceneData.y, sceneHeight);
-    targetObj.gameObject.width = getNumericValue(sceneData.width, sceneWidth);
-    targetObj.gameObject.height = getNumericValue(
-      sceneData.height,
-      sceneHeight
-    );
+  //   return null;
+  // }
 
-    targetObj.gameObject.scale.set(sceneData.scale, sceneData.scale);
-    targetObj.gameObject.alpha = sceneData.opacity;
-    targetObj.gameObject.visible = sceneData.isActive;
-  }
+  // public findObjectByName(name: string): InspectorObjectType | null {
+  //   return this.findObjectByNameRecursive(this.objects, name);
+  // }
 
-  public changeObjectParameter(
-    objName: string,
-    data: ChangeOpbjectDataType,
-    sceneWidth: number,
-    sceneHeight: number
-  ) {
-    const targetObj = this.findObjectByName(objName);
+  // public onGameSceneResize(sceneWidth: number, sceneHeight: number) {
+  //   const objects = this.getAllObjectsFlat();
+  //   for (const obj of objects) {
+  //     this.changeObjectBulk(obj.name, obj.sceneData, sceneWidth, sceneHeight);
+  //   }
+  // }
 
-    if (!targetObj) {
-      throw new Error("targetObject is undefined");
-    }
+  // public changeObjectBulk(
+  //   objName: string,
+  //   sceneData: InspectorObjectType["sceneData"],
+  //   sceneWidth: number,
+  //   sceneHeight: number
+  // ) {
+  //   const targetObj = this.findObjectByName(objName);
+  //   if (!targetObj) {
+  //     throw new Error("targetObject is undefined");
+  //   }
 
-    // Helper function to support % values
-    const getNumericValue = (
-      value: string | number,
-      fullSize: number
-    ): number => {
-      if (typeof value === "string" && value.trimEnd().endsWith("%")) {
-        const cleaned = value.trimEnd().replace(/\s+%$/, "%").slice(0, -1);
-        const percent = parseFloat(cleaned);
-        if (!isNaN(percent)) {
-          return (fullSize * percent) / 100;
-        }
-      }
-      return Number(value);
-    };
+  //   const getNumericValue = (
+  //     value: string | number,
+  //     fullSize: number
+  //   ): number => {
+  //     if (typeof value === "string" && value.trimEnd().endsWith("%")) {
+  //       const cleaned = value.trimEnd().replace(/\s+%$/, "%").slice(0, -1);
+  //       const percent = parseFloat(cleaned);
+  //       if (!isNaN(percent)) {
+  //         return (fullSize * percent) / 100;
+  //       }
+  //     }
+  //     return Number(value);
+  //   };
 
-    switch (data.parameter) {
-      case "scale":
-        targetObj.sceneData.scale = Number(data.value);
-        targetObj.gameObject.scale.set(Number(data.value), Number(data.value));
-        break;
+  //   // Apply all values from sceneData
+  //   targetObj.sceneData = { ...sceneData };
+  //   targetObj.gameObject.x = getNumericValue(sceneData.x, sceneWidth);
+  //   targetObj.gameObject.y = getNumericValue(sceneData.y, sceneHeight);
+  //   targetObj.gameObject.width = getNumericValue(sceneData.width, sceneWidth);
+  //   targetObj.gameObject.height = getNumericValue(
+  //     sceneData.height,
+  //     sceneHeight
+  //   );
 
-      case "x":
-        targetObj.sceneData.x = String(data.value);
-        targetObj.gameObject.x = getNumericValue(
-          String(data.value),
-          sceneWidth
-        );
-        break;
+  //   targetObj.gameObject.scale.set(sceneData.scale, sceneData.scale);
+  //   targetObj.gameObject.alpha = sceneData.opacity;
+  //   targetObj.gameObject.visible = sceneData.isActive;
+  // }
 
-      case "y":
-        targetObj.sceneData.y = String(data.value);
-        targetObj.gameObject.y = getNumericValue(
-          String(data.value),
-          sceneHeight
-        );
-        break;
+  // public changeObjectParameter(
+  //   objName: string,
+  //   data: ChangeOpbjectDataType,
+  //   sceneWidth: number,
+  //   sceneHeight: number
+  // ) {
+  //   const targetObj = this.findObjectByName(objName);
 
-      case "width":
-        targetObj.sceneData.width = String(data.value);
-        targetObj.gameObject.width = getNumericValue(
-          String(data.value),
-          sceneWidth
-        );
-        break;
+  //   if (!targetObj) {
+  //     throw new Error("targetObject is undefined");
+  //   }
 
-      case "height":
-        targetObj.sceneData.height = String(data.value);
-        targetObj.gameObject.height = getNumericValue(
-          String(data.value),
-          sceneHeight
-        );
-        break;
+  //   // Helper function to support % values
+  //   const getNumericValue = (
+  //     value: string | number,
+  //     fullSize: number
+  //   ): number => {
+  //     if (typeof value === "string" && value.trimEnd().endsWith("%")) {
+  //       const cleaned = value.trimEnd().replace(/\s+%$/, "%").slice(0, -1);
+  //       const percent = parseFloat(cleaned);
+  //       if (!isNaN(percent)) {
+  //         return (fullSize * percent) / 100;
+  //       }
+  //     }
+  //     return Number(value);
+  //   };
 
-      case "opacity":
-        targetObj.sceneData.opacity = Number(data.value);
-        targetObj.gameObject.alpha = Number(data.value);
-        break;
+  //   switch (data.parameter) {
+  //     case "scale":
+  //       targetObj.sceneData.scale = Number(data.value);
+  //       targetObj.gameObject.scale.set(Number(data.value), Number(data.value));
+  //       break;
 
-      case "visible":
-        targetObj.sceneData.isActive = Boolean(data.value);
-        targetObj.gameObject.visible = Boolean(data.value);
-        break;
+  //     case "x":
+  //       targetObj.sceneData.x = String(data.value);
+  //       targetObj.gameObject.x = getNumericValue(
+  //         String(data.value),
+  //         sceneWidth
+  //       );
+  //       break;
 
-      case "rotation":
-        targetObj.sceneData.rotation = Number(data.value);
-        targetObj.gameObject.rotation = Number(data.value);
-        break;
+  //     case "y":
+  //       targetObj.sceneData.y = String(data.value);
+  //       targetObj.gameObject.y = getNumericValue(
+  //         String(data.value),
+  //         sceneHeight
+  //       );
+  //       break;
 
-      case "ancor":
-        targetObj.sceneData.ancor = data.value as [number, number];
-        (targetObj.gameObject as Sprite).anchor.set(
-          ...(data.value as [number, number])
-        );
-        break;
+  //     case "width":
+  //       targetObj.sceneData.width = String(data.value);
+  //       targetObj.gameObject.width = getNumericValue(
+  //         String(data.value),
+  //         sceneWidth
+  //       );
+  //       break;
 
-      default:
-        console.error("Unknown Parameter:", data.parameter);
-    }
-  }
+  //     case "height":
+  //       targetObj.sceneData.height = String(data.value);
+  //       targetObj.gameObject.height = getNumericValue(
+  //         String(data.value),
+  //         sceneHeight
+  //       );
+  //       break;
+
+  //     case "opacity":
+  //       targetObj.sceneData.opacity = Number(data.value);
+  //       targetObj.gameObject.alpha = Number(data.value);
+  //       break;
+
+  //     case "visible":
+  //       targetObj.sceneData.isActive = Boolean(data.value);
+  //       targetObj.gameObject.visible = Boolean(data.value);
+  //       break;
+
+  //     case "rotation":
+  //       targetObj.sceneData.rotation = Number(data.value);
+  //       targetObj.gameObject.rotation = Number(data.value);
+  //       break;
+
+  //     case "ancor":
+  //       targetObj.sceneData.ancor = data.value as [number, number];
+  //       (targetObj.gameObject as Sprite).anchor.set(
+  //         ...(data.value as [number, number])
+  //       );
+  //       break;
+
+  //     default:
+  //       console.error("Unknown Parameter:", data.parameter);
+  //   }
+  // }
 }

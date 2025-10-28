@@ -12,19 +12,20 @@ import useUpdateInspectorObjects from "@/hooks/useupdateInspectorObjects";
 export default function SceneComponent() {
   const gameEngine = useStore((state) => state.gameEngine)!;
   const sceneDivRef = useRef<HTMLDivElement>(null);
-  const [isSceneCreated, setIsSceneCreated] = useState(false);
+  const setupDoneRef = useRef(false); // <-- ref to guard setup
   const [isOpenBuildSettins, setIsOpenBuildSettings] = useState(false);
   const updateInspectorObjects = useUpdateInspectorObjects();
-  const objects = useStore((state) => state.inspectorObjects);
 
   useEffect(() => {
+    if (setupDoneRef.current) return; // already set up
+
+    setupDoneRef.current = true; // mark as done
     const setup = async () => {
       await gameEngine.createScene(sceneDivRef.current!);
-      setIsSceneCreated(true);
     };
-
     setup();
-  }, []);
+  }, []); // empty dependency array
+
 
   const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -35,31 +36,29 @@ export default function SceneComponent() {
       return;
     }
 
-    const assetName = e.dataTransfer.getData("text/plain");
-    const asset = gameEngine.getAssetByName(assetName);
+    // const assetName = e.dataTransfer.getData("text/plain");
+    // const asset = gameEngine.getAssetByName(assetName);
 
-    if (asset) {
-      await gameEngine.addGameObject(
-        asset.name,
-        asset.blobURL,
-        asset.type,
-        asset.file
-      );
+    // if (asset) {
+    //   await gameEngine.addGameObject(
+    //     asset.name,
+    //     asset.blobURL,
+    //     asset.type,
+    //     asset.file
+    //   );
 
-      updateInspectorObjects();
-    }
+    updateInspectorObjects();
   };
 
   function handleFullScreen() {
-    const el = sceneDivRef.current;
-    if (!el) return;
-
-    if (el.requestFullscreen) {
-      el.requestFullscreen().catch((err) => {
-        console.error("Fullscreen request failed:", err);
-        alert("Sorry Your Browser does not support full screen mode...");
-      });
-    }
+    // const el = sceneDivRef.current;
+    // if (!el) return;
+    // if (el.requestFullscreen) {
+    //   el.requestFullscreen().catch((err) => {
+    //     console.error("Fullscreen request failed:", err);
+    //     alert("Sorry Your Browser does not support full screen mode...");
+    //   });
+    // }
   }
 
   return (
@@ -94,10 +93,10 @@ export default function SceneComponent() {
         className="w-full h-screen absolute top-0 left-0"
         ref={sceneDivRef}
         onDragOver={(e) => e.preventDefault()}
-        onDrop={handleDrop}
+        // onDrop={handleDrop}
       ></div>
 
-      {isSceneCreated && isOpenBuildSettins && (
+      {setupDoneRef && isOpenBuildSettins && (
         <>
           {/* Shadow */}
           <div

@@ -1,3 +1,6 @@
+import { AssetEventEnums } from "@/enums/userEventEnums";
+import EventManager from "../../eventManager";
+
 export type AssetType = {
   name: string;
   type: string;
@@ -6,68 +9,79 @@ export type AssetType = {
 };
 
 export default class Assets {
-  private assets: Record<string, AssetType> = {};
+  public gameAssets: Record<string, AssetType> = {};
 
-  public deleteAsset(name: string) {
-    delete this.assets[name];
+  constructor(public eventManager: EventManager) {}
+
+  public addAsset(file: File) {
+    this.eventManager.emit(AssetEventEnums.addAsset, {
+      id: "2",
+      type: "img",
+    });
   }
 
-  public addNewAsset(file: File) {
-    const blobURL = URL.createObjectURL(file);
+  public deleteAsset() {}
 
-    const detectType = () => {
-      if (file.type.includes("image")) return "img";
-      if (file.type.includes("video")) return "video";
-      return "unknown";
-    };
+  // public deleteAsset(name: string) {
+  //   delete this.assets[name];
+  // }
 
-    const fileParts = file.name.split(".");
-    const extension = fileParts.pop();
-    let baseName = fileParts.join(".");
+  // public addNewAsset(file: File) {
+  //   const blobURL = URL.createObjectURL(file);
 
-    if (baseName.length > 18) {
-      baseName = baseName.slice(0, 10);
-    }
+  //   const detectType = () => {
+  //     if (file.type.includes("image")) return "img";
+  //     if (file.type.includes("video")) return "video";
+  //     return "unknown";
+  //   };
 
-    // 👉 Check for exact duplicate by size and lastModified:
-    const duplicate = Object.values(this.assets).find(
-      (asset) =>
-        asset.file.size === file.size &&
-        asset.file.lastModified === file.lastModified
-    );
+  //   const fileParts = file.name.split(".");
+  //   const extension = fileParts.pop();
+  //   let baseName = fileParts.join(".");
 
-    if (duplicate) {
-      alert(`Asset already added: ${duplicate.name}`);
-      return; // Skip adding completely
-    }
+  //   if (baseName.length > 18) {
+  //     baseName = baseName.slice(0, 10);
+  //   }
 
-    let finalName = baseName;
-    let count = 1;
-    let fileNameWithExtension = `${finalName}.${extension}`;
+  //   // 👉 Check for exact duplicate by size and lastModified:
+  //   const duplicate = Object.values(this.assets).find(
+  //     (asset) =>
+  //       asset.file.size === file.size &&
+  //       asset.file.lastModified === file.lastModified
+  //   );
 
-    while (
-      Object.values(this.assets).find(
-        (asset) => asset.name === fileNameWithExtension
-      )
-    ) {
-      count++;
-      finalName = `${baseName}(clone ${count - 1})`;
-      fileNameWithExtension = `${finalName}.${extension}`;
-    }
+  //   if (duplicate) {
+  //     alert(`Asset already added: ${duplicate.name}`);
+  //     return; // Skip adding completely
+  //   }
 
-    this.assets[fileNameWithExtension] = {
-      name: fileNameWithExtension,
-      type: detectType(),
-      file,
-      blobURL,
-    };
-  }
+  //   let finalName = baseName;
+  //   let count = 1;
+  //   let fileNameWithExtension = `${finalName}.${extension}`;
 
-  public getAllAsset() {
-    return Object.values(this.assets);
-  }
+  //   while (
+  //     Object.values(this.assets).find(
+  //       (asset) => asset.name === fileNameWithExtension
+  //     )
+  //   ) {
+  //     count++;
+  //     finalName = `${baseName}(clone ${count - 1})`;
+  //     fileNameWithExtension = `${finalName}.${extension}`;
+  //   }
 
-  public getAssetByName(name: string): AssetType | undefined {
-    return Object.values(this.assets).find((asset) => asset.name === name);
-  }
+  //   this.assets[fileNameWithExtension] = {
+  //     name: fileNameWithExtension,
+  //     type: detectType(),
+  //     file,
+  //     blobURL,
+  //   };
+  // }
+
+  // public getAllAsset() {
+  //   return Object.values(this.assets);
+  // }
+
+  // public getAssetByName(name: string): AssetType | undefined {
+  //   return Object.values(this.assets).find((asset) => asset.name === name);
+  // }
 }

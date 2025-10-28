@@ -4,28 +4,27 @@ import InspectorObjectComponent from "./components/inspectorObjectComponent";
 import useStore from "@/app/store";
 
 export default function InspectorComponent() {
-  const objects = useStore((s) => s.inspectorObjects);
   const gameEngine = useStore((state) => state.gameEngine)!;
   const updateInspectorObjects = useUpdateInspectorObjects();
 
   const handleDrop = (e: React.DragEvent<HTMLUListElement>) => {
     e.preventDefault();
 
-    const origin = e.dataTransfer.getData("origin");
-    const childObjectName = e.dataTransfer.getData("object_name");
+    // const origin = e.dataTransfer.getData("origin");
+    // const childObjectName = e.dataTransfer.getData("object_name");
 
-    if (origin !== "inspector") {
-      console.log("Ignored drop from non-inspector");
-      return;
-    }
+    // if (origin !== "inspector") {
+    //   console.log("Ignored drop from non-inspector");
+    //   return;
+    // }
 
-    const childObject = gameEngine.findObjectByName(childObjectName);
-    if (!childObject) {
-      throw new Error("can not find child object");
-    }
+    // const childObject = gameEngine.findObjectByName(childObjectName);
+    // if (!childObject) {
+    //   throw new Error("can not find child object");
+    // }
 
-    gameEngine.removeFromParent(childObject);
-    updateInspectorObjects();
+    // gameEngine.removeFromParent(childObject);
+    // updateInspectorObjects();
   };
 
   return (
@@ -41,9 +40,9 @@ export default function InspectorComponent() {
         }}
         className="w-full h-full flex-grow  overflow-y-auto"
       >
-        {objects.map((object, index) => (
+        {/* {objects.map((object, index) => (
           <InspectorObjectComponent key={index} object={object} />
-        ))}
+        ))} */}
       </ul>
     </aside>
   );
