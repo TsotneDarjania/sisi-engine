@@ -1,14 +1,18 @@
 import { Application, Sprite, Texture } from "pixi.js";
 import { SceneMenu } from "./sceneMenu/sceneMenu";
 import { SceneControllers } from "./sceneControllers";
+import EventManager from "../../eventManager";
+import { AssetType, GameSceneEventEnums } from "@/enums/userEventEnums";
 
 export class EngineScene {
   private app!: Application;
   private parentDIV!: HTMLDivElement;
   private sceneIndicators!: SceneMenu;
-  private sceneControllers! : SceneControllers;
+  private sceneControllers!: SceneControllers;
 
   private canvasBackgroundColor: string = "#101828";
+
+  constructor(public events: EventManager) {}
 
   get backgroundColor() {
     return this.canvasBackgroundColor;
@@ -30,16 +34,16 @@ export class EngineScene {
       resizeTo: this.parentDIV,
     });
     this.app.renderer.on("resize", () => {
-      this.onResize();
+      // this.onResize();
       onResizeCallBack();
     });
     this.parentDIV.appendChild(this.app.canvas);
     this.addSceneIndicators();
-    this.createSceneControllers()
+    this.createSceneControllers();
   }
 
-  private createSceneControllers(){
-    this.sceneControllers = new SceneControllers()
+  private createSceneControllers() {
+    this.sceneControllers = new SceneControllers();
   }
 
   public addSceneIndicators() {
@@ -50,41 +54,48 @@ export class EngineScene {
     );
   }
 
-  public async addGameObject(srcURL: string) {
-    const texture = await new Promise<Texture>((resolve) => {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => resolve(Texture.from(img));
-      img.onerror = (err) => {
-        console.error(`Failed to load image at ${srcURL}`, err);
-      };
-      img.src = srcURL;
-    });
+  public async droppedAsset(asset: AssetType) {
+    if (asset.type === "image") {
+      const texture = await new Promise<Texture>((resolve) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(Texture.from(img));
+        img.onerror = (err) => {
+          console.error(`Failed to load image at ${asset.blobURL}`, err);
+        };
+        img.src = asset.blobURL;
+      });
 
-    const sprite = new Sprite(texture);
-    sprite.anchor.set(0.5);
-    sprite.x = this.app.renderer.width / 2;
-    sprite.y = this.app.renderer.height / 2;
-    sprite.scale.set(1, 1);
+      const sprite = new Sprite(texture);
+      sprite.anchor.set(0.5);
+      sprite.x = this.app.renderer.width / 2;
+      sprite.y = this.app.renderer.height / 2;
+      sprite.scale.set(1, 1);
 
-    this.app.stage.addChild(sprite);
+      this.app.stage.addChild(sprite);
 
-    return sprite;
-  }
+      this.events.emit(GameSceneEventEnums.dropedAsset, {
+        asset: asset,
+        pixiObject : sprite,
+      });
 
-  public getSceneWidthAndHeight() {
-    return {
-      width: this.app.canvas.width,
-      height: this.app.canvas.height,
-    };
-  }
-
-  private onResize() {
-    if (this.sceneIndicators) {
-      this.sceneIndicators.onResize(
-        this.app.renderer.width,
-        this.app.renderer.height
-      );
+      return sprite;
     }
   }
+
+  // public getSceneWidthAndHeight() {
+  //   return {
+  //     width: this.app.canvas.width,
+  //     height: this.app.canvas.height,
+  //   };
+  // }
+
+  // private onResize() {
+  //   if (this.sceneIndicators) {
+  //     this.sceneIndicators.onResize(
+  //       this.app.renderer.width,
+  //       this.app.renderer.height
+  //     );
+  //   }
+  // }
 }

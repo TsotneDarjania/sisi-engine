@@ -1,38 +1,31 @@
-import { InspectorObjectType } from "@/app/core/engine/inspector";
 import InspectorObjectIndicators from "../indicators";
 import PropertiesComponent from "../propterties";
 import { useState } from "react";
-import GameEngine, {
-  ChangeOpbjectDataType,
-  GameObjectParameterType,
-} from "@/app/core";
 import useStore from "@/app/store";
-import useUpdateInspectorObjects from "@/hooks/useupdateInspectorObjects";
+import { GameObjectParameterType, GameObjectType } from "@/types/engineTypes";
 
 // handleDrop: (
 //   e: React.DragEvent<HTMLLIElement>,
 //   parentObject: InspectorObjectType
 // ) => void;
 
-function isChildAlreadyNested(
-  parent: InspectorObjectType,
-  targetName: string
-): boolean {
-  for (const child of parent.childs) {
-    if (child.name === targetName) return true;
-    if (isChildAlreadyNested(child, targetName)) return true;
-  }
-  return false;
-}
+// function isChildAlreadyNested(
+//   parent: InspectorObjectType,
+//   targetName: string
+// ): boolean {
+//   for (const child of parent.childs) {
+//     if (child.name === targetName) return true;
+//     if (isChildAlreadyNested(child, targetName)) return true;
+//   }
+//   return false;
+// }
 
 export default function InspectorObjectComponent({
   object,
 }: {
-  object: InspectorObjectType;
+  object: GameObjectType;
 }) {
   const gameEngine = useStore((state) => state.gameEngine)!;
-  const updateInspectorObjects = useUpdateInspectorObjects();
-  const objects = useStore((s) => s.inspectorObjects);
 
   const [isOpen, setIsOPen] = useState(false);
 
@@ -40,9 +33,8 @@ export default function InspectorObjectComponent({
     setIsOPen((prev) => !prev);
   }
 
-  function deleteObject(objName: string) {
-    gameEngine.deleteObject(objName);
-    updateInspectorObjects();
+  function deleteObject(id: string) {
+      gameEngine.inspector.deleteGameObject(id)
   }
 
   const changeObjectParameter = (
@@ -50,10 +42,10 @@ export default function InspectorObjectComponent({
     objName: string,
     value: string | number | boolean | [number, number]
   ) => {
-    gameEngine.changeGameobjectFromInspector(objName, {
-      parameter,
-      value,
-    });
+    // gameEngine.changeGameobjectFromInspector(objName, {
+    //   parameter,
+    //   value,
+    // });
   };
 
   const handleDrop = (e: React.DragEvent<HTMLLIElement>) => {
@@ -78,14 +70,14 @@ export default function InspectorObjectComponent({
       return;
     }
 
-    const childObject = gameEngine.findObjectByName(childObjectName);
+    // const childObject = gameEngine.findObjectByName(childObjectName);
 
-    if (childObject) {
-      gameEngine.combineInspectorObjects(childObject, object);
-      updateInspectorObjects();
-    } else {
-      throw new Error("child object is undefined");
-    }
+    // if (childObject) {
+    //   gameEngine.combineInspectorObjects(childObject, object);
+    //   updateInspectorObjects();
+    // } else {
+    //   throw new Error("child object is undefined");
+    // }
   };
 
   return (

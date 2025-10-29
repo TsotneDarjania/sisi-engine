@@ -1,33 +1,110 @@
 import { ContainerChild, Sprite } from "pixi.js";
 import EventManager from "../../eventManager";
 import { GameObjectType } from "@/types/engineTypes";
-
-
+import { AssetType, GameSceneEventEnums, InspectorEventEnums } from "@/enums/userEventEnums";
+import { uid } from "@/helper";
 
 export class Inspector {
-  private gameObjects: Array<GameObjectType> = [];
+  public gameObjects: Array<GameObjectType> = [];
 
-  
-  constructor(public eventManager : EventManager){
-
+  constructor(public events: EventManager) {
+    events.on(GameSceneEventEnums.dropedAsset, (data) => {
+      this.addGameObject(data);
+    });
   }
 
-  addGameObject(){
-
+  private findObjectByID(id: string): GameObjectType | null {
+    return this.findObjectByIDRecursive(this.gameObjects, id);
   }
 
+  private findObjectByIDRecursive(
+    list: GameObjectType[],
+    id: string
+  ): GameObjectType | null {
+    for (const obj of list) {
+      if (obj.id === id) return obj;
 
-  // private removeObjectRecursive(
-  //   list: InspectorObjectType[],
-  //   targetName: string
-  // ): InspectorObjectType[] {
-  //   return list
-  //     .filter((obj) => obj.name !== targetName)
-  //     .map((obj) => ({
-  //       ...obj,
-  //       childs: this.removeObjectRecursive(obj.childs, targetName),
-  //     }));
-  // }
+      const foundInChild = this.findObjectByIDRecursive(obj.childs, id);
+      if (foundInChild) return foundInChild;
+    }
+
+    return null;
+  }
+
+  private getAllObjectsFlatRecursive(
+    list: GameObjectType[],
+    result: GameObjectType[]
+  ) {
+    for (const obj of list) {
+      result.push(obj);
+      this.getAllObjectsFlatRecursive(obj.childs, result);
+    }
+  }
+
+  private getAllObjectsFlat(): GameObjectType[] {
+    const result: GameObjectType[] = [];
+    this.getAllObjectsFlatRecursive(this.gameObjects, result);
+    return result;
+  }
+
+  private getObjectName(baseName: string) {
+    let count = 1;
+    let fileName = baseName;
+
+    while (this.getAllObjectsFlat().find((asset) => asset.name === fileName)) {
+      fileName = `${baseName} (${count})`;
+      count++;
+    }
+
+    return fileName;
+  }
+
+  public addGameObject(data: { asset: AssetType; pixiObject: ContainerChild }) {
+    this.gameObjects.push({
+      type: data.asset.type,
+      name: this.getObjectName(data.asset.name),
+      id: uid(),
+      gameObject: data.pixiObject,
+      scene: "testScene",
+      blobURL: data.asset.blobURL,
+      childs: [],
+      sceneData: {
+        x: String(data.pixiObject.x),
+        y: String(data.pixiObject.y),
+        width: String(data.pixiObject.width),
+        height: String(data.pixiObject.height),
+        scale: data.pixiObject.scale.x,
+        opacity: data.pixiObject.alpha,
+        isActive: data.pixiObject.visible,
+        rotation: data.pixiObject.rotation,
+        ancor: [data.pixiObject.pivot.x, data.pixiObject.pivot.y],
+      },
+    });
+  }
+
+  public deleteGameObject(id: string) {
+    const target = this.findObjectByID(id);
+    if (!target) {
+      throw new Error("target object is undefined (for delete)");
+    }
+
+    target.gameObject.destroy(true);
+    this.gameObjects = this.removeObjectRecursive(this.gameObjects, id);
+
+    this.events.emit(InspectorEventEnums.deleteGameObject, id)
+  }
+
+  private removeObjectRecursive(
+    list: GameObjectType[],
+    targetID: string
+  ): GameObjectType[] {
+    return list
+      .filter((obj) => obj.id !== targetID)
+      .map((obj) => ({
+        ...obj,
+        childs: this.removeObjectRecursive(obj.childs, targetID),
+      }));
+  }
 
   // public combineObject(
   //   child: InspectorObjectType,
@@ -88,86 +165,12 @@ export class Inspector {
   //   this.objects.push(childObject);
   // }
 
-  // public deleteObject(name: string) {
-  //   const target = this.findObjectByName(name);
-  //   if (!target) {
-  //     throw new Error("target object is undefined (for delete)");
-  //   }
 
-  //   target.gameObject.destroy(true);
-  //   this.objects = this.removeObjectRecursive(this.objects, name);
-  // }
-
-  // private getAllObjectsFlatRecursive(
-  //   list: InspectorObjectType[],
-  //   result: InspectorObjectType[]
-  // ) {
-  //   for (const obj of list) {
-  //     result.push(obj);
-  //     this.getAllObjectsFlatRecursive(obj.childs, result);
-  //   }
-  // }
-
-  // private getAllObjectsFlat(): InspectorObjectType[] {
-  //   const result: InspectorObjectType[] = [];
-  //   this.getAllObjectsFlatRecursive(this.objects, result);
-  //   return result;
-  // }
-
-  // public addObject(
-  //   type: string,
-  //   name: string,
-  //   gameObject: ContainerChild,
-  //   sceneName: string,
-  //   file: File
-  // ) {
-  //   let count = 1;
-  //   let fileName = name;
-
-  //   while (this.getAllObjectsFlat().find((asset) => asset.name === fileName)) {
-  //     fileName = `${name} ${count}`;
-  //     count++;
-  //   }
-
-  //   this.objects.push({
-  //     type,
-  //     name: fileName,
-  //     gameObject,
-  //     scene: sceneName,
-  //     assetFile: file,
-  //     assetSRC: name,
-  //     childs: [],
-  //     sceneData: {
-  //       x: String(gameObject.x),
-  //       y: String(gameObject.y),
-  //       width: String(gameObject.width),
-  //       height: String(gameObject.height),
-  //       scale: gameObject.scale.x,
-  //       opacity: gameObject.alpha,
-  //       isActive: gameObject.visible,
-  //       rotation: gameObject.rotation,
-  //       ancor: [gameObject.pivot.x, gameObject.pivot.y],
-  //     },
-  //   });
-  // }
 
   // get AllObject() {
   //   return this.objects;
   // }
 
-  // private findObjectByNameRecursive(
-  //   list: InspectorObjectType[],
-  //   name: string
-  // ): InspectorObjectType | null {
-  //   for (const obj of list) {
-  //     if (obj.name === name) return obj;
-
-  //     const foundInChild = this.findObjectByNameRecursive(obj.childs, name);
-  //     if (foundInChild) return foundInChild;
-  //   }
-
-  //   return null;
-  // }
 
   // public findObjectByName(name: string): InspectorObjectType | null {
   //   return this.findObjectByNameRecursive(this.objects, name);

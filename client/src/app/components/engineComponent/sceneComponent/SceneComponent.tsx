@@ -3,18 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import { SlSizeFullscreen } from "react-icons/sl";
 import { AiOutlinePlaySquare } from "react-icons/ai";
-import { FaToolbox } from "react-icons/fa";
 import { FaFileDownload } from "react-icons/fa";
-import BuildSettingsComponent from "../buildSettingsComponent/BuildSettinsComponent";
 import useStore from "@/app/store";
-import useUpdateInspectorObjects from "@/hooks/useupdateInspectorObjects";
+import { AssetType } from "@/enums/userEventEnums";
 
 export default function SceneComponent() {
   const gameEngine = useStore((state) => state.gameEngine)!;
   const sceneDivRef = useRef<HTMLDivElement>(null);
   const setupDoneRef = useRef(false); // <-- ref to guard setup
   const [isOpenBuildSettins, setIsOpenBuildSettings] = useState(false);
-  const updateInspectorObjects = useUpdateInspectorObjects();
 
   useEffect(() => {
     if (setupDoneRef.current) return; // already set up
@@ -26,7 +23,6 @@ export default function SceneComponent() {
     setup();
   }, []); // empty dependency array
 
-
   const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const origin = e.dataTransfer.getData("origin");
@@ -36,29 +32,20 @@ export default function SceneComponent() {
       return;
     }
 
-    // const assetName = e.dataTransfer.getData("text/plain");
-    // const asset = gameEngine.getAssetByName(assetName);
+    const asset = JSON.parse( e.dataTransfer.getData("application/json")) as unknown as AssetType;
+    gameEngine.engineScene.droppedAsset(asset)
 
-    // if (asset) {
-    //   await gameEngine.addGameObject(
-    //     asset.name,
-    //     asset.blobURL,
-    //     asset.type,
-    //     asset.file
-    //   );
-
-    updateInspectorObjects();
   };
 
   function handleFullScreen() {
-    // const el = sceneDivRef.current;
-    // if (!el) return;
-    // if (el.requestFullscreen) {
-    //   el.requestFullscreen().catch((err) => {
-    //     console.error("Fullscreen request failed:", err);
-    //     alert("Sorry Your Browser does not support full screen mode...");
-    //   });
-    // }
+    const el = sceneDivRef.current;
+    if (!el) return;
+    if (el.requestFullscreen) {
+      el.requestFullscreen().catch((err) => {
+        console.error("Fullscreen request failed:", err);
+        alert("Sorry Your Browser does not support full screen mode...");
+      });
+    }
   }
 
   return (
@@ -89,11 +76,12 @@ export default function SceneComponent() {
         </div>
       </div>
 
+      {/* Canvas Parent Div*/}
       <div
         className="w-full h-screen absolute top-0 left-0"
         ref={sceneDivRef}
         onDragOver={(e) => e.preventDefault()}
-        // onDrop={handleDrop}
+        onDrop={handleDrop}
       ></div>
 
       {setupDoneRef && isOpenBuildSettins && (
@@ -105,11 +93,11 @@ export default function SceneComponent() {
             }}
             className="w-screen cursor-pointer h-screen fixed left-0 top-0 bg-black z-20 opacity-90"
           ></div>
-          <BuildSettingsComponent
+          {/* <BuildSettingsComponent
             gameEngine={gameEngine}
             canvasWidth={gameEngine.canvas.clientWidth}
             canvasHeight={gameEngine.canvas.clientHeight}
-          />
+          /> */}
         </>
       )}
     </main>

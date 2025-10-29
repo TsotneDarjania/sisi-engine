@@ -1,6 +1,6 @@
 import JSZip from "jszip";
 import { Builder } from "./builder";
-import Assets, { AssetType } from "./engine/assets";
+import Assets from "./engine/assets";
 import { EngineScene } from "./engine/engineScene";
 import { Inspector } from "./engine/inspector";
 import { saveAs } from "file-saver";
@@ -11,9 +11,9 @@ import { EventPayloads } from "@/enums/userEventEnums";
 
 export default class GameEngine {
   private _assets!: Assets;
-  private engineScene!: EngineScene;
+  private _engineScene!: EngineScene;
   private _inspector!: Inspector;
-  private eventManager!: EventManager;
+  private _events!: EventManager;
 
   private builder!: Builder;
 
@@ -21,14 +21,6 @@ export default class GameEngine {
 
   constructor() {
     this.init();
-  }
-
-  get sceneName() {
-    return this.currentSceneName;
-  }
-
-  get canvas() {
-    return this.engineScene.parentDiv;
   }
 
   private init() {
@@ -39,15 +31,15 @@ export default class GameEngine {
   }
 
   private createEventManager() {
-    this.eventManager = new EventManager<EventPayloads>();
+    this._events = new EventManager<EventPayloads>();
   }
 
   private createAssets() {
-    this._assets = new Assets(this.eventManager);
+    this._assets = new Assets(this._events);
   }
 
   private createInspector() {
-    this._inspector = new Inspector(this.eventManager);
+    this._inspector = new Inspector(this._events);
   }
 
   private createBuilder() {
@@ -57,7 +49,7 @@ export default class GameEngine {
   // Public API
 
   public async createScene(parentDIV: HTMLDivElement) {
-    this.engineScene = new EngineScene();
+    this._engineScene = new EngineScene(this.events);
 
     await this.engineScene.init(parentDIV, () => {
       // this.onGameScreenResize();
@@ -65,11 +57,19 @@ export default class GameEngine {
   }
 
   get assets() {
-    return this._assets
+    return this._assets;
   }
 
   get inspector() {
     return this._inspector;
+  }
+
+  get events() {
+    return this._events;
+  }
+
+  get engineScene(){
+    return this._engineScene
   }
 
   // public async addGameObject(

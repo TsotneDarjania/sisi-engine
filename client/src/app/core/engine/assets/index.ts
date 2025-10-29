@@ -1,30 +1,46 @@
-import { AssetEventEnums } from "@/enums/userEventEnums";
+import { AssetEventEnums, AssetType } from "@/enums/userEventEnums";
 import EventManager from "../../eventManager";
-
-export type AssetType = {
-  name: string;
-  type: string;
-  file: File;
-  blobURL: string;
-};
+import { uid } from "@/helper";
 
 export default class Assets {
-  public gameAssets: Record<string, AssetType> = {};
+  public gameAssets: Array<AssetType> = [];
 
   constructor(public eventManager: EventManager) {}
 
   public addAsset(file: File) {
-    this.eventManager.emit(AssetEventEnums.addAsset, {
-      id: "2",
-      type: "img",
-    });
+    const blobURL = URL.createObjectURL(file);
+
+    const detectType = () => {
+      if (file.type.includes("image")) return "image";
+      if (file.type.includes("video")) return "video";
+      return "unknown";
+    };
+
+    const existing = this.gameAssets.find(
+      (a) => a.name === file.name.split(".")[0] && a.type === detectType()
+    );
+    if (existing) {
+      alert("File already added!");
+      return;
+    }
+
+    const asset: AssetType = {
+      name: file.name.split(".")[0],
+      id: uid(),
+      type: detectType(),
+      blobURL,
+    };
+
+    this.gameAssets.push(asset);
+    this.eventManager.emit(AssetEventEnums.addAsset, asset);
   }
 
-  public deleteAsset() {}
+  public deleteAsset(id : string) {
+    const newArr = this.gameAssets.filter((asset) => asset.id !== id)
+    this.gameAssets = newArr;
 
-  // public deleteAsset(name: string) {
-  //   delete this.assets[name];
-  // }
+    this.eventManager.emit(AssetEventEnums.deleteAsset, id);
+  }
 
   // public addNewAsset(file: File) {
   //   const blobURL = URL.createObjectURL(file);

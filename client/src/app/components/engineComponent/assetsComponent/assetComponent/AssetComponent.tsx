@@ -1,9 +1,15 @@
-import { AssetType } from "@/app/core/engine/assets";
+import { AssetType } from "@/enums/userEventEnums";
 import Image from "next/image";
 import { IoMdMove } from "react-icons/io";
 import { MdDeleteForever } from "react-icons/md";
 
-export function AssetComponent({ asset, deleteAsset }: { asset: AssetType, deleteAsset : (id : string) => void}) {
+export function AssetComponent({
+  asset,
+  deleteAsset,
+}: {
+  asset: AssetType;
+  deleteAsset: (id: string) => void;
+}) {
   return (
     <li
       key={asset.name}
@@ -15,12 +21,11 @@ export function AssetComponent({ asset, deleteAsset }: { asset: AssetType, delet
         {/* Name */}
         <p>{asset.name}</p>
         {/* Preview */}
-
         {(() => {
           if (asset.type === "video") {
             return <video className="w-5 h-5" src={asset.blobURL}></video>;
           }
-          if (asset.type === "img") {
+          if (asset.type === "image") {
             return (
               <div className="relative w-5 h-5">
                 <Image
@@ -41,7 +46,12 @@ export function AssetComponent({ asset, deleteAsset }: { asset: AssetType, delet
         <div
           draggable
           onDragStart={(e) => {
-            e.dataTransfer.setData("text/plain", asset.name);
+            e.dataTransfer.setData("application/json", JSON.stringify({
+              id : asset.id,
+              name : asset.name,
+              type : asset.type,
+              blobURL : asset.blobURL
+            }));
             e.dataTransfer.setData("origin", "assets");
           }}
           className="cursor-pointer inline-block"
@@ -52,7 +62,7 @@ export function AssetComponent({ asset, deleteAsset }: { asset: AssetType, delet
         {/* Delete */}
         <MdDeleteForever
           onClick={() => {
-            deleteAsset(asset.name);
+            deleteAsset(asset.id);
           }}
           className="cursor-pointer"
           fontSize={"30px"}

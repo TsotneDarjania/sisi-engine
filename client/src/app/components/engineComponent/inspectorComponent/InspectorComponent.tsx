@@ -1,11 +1,24 @@
 "use client";
-import useUpdateInspectorObjects from "@/hooks/useupdateInspectorObjects";
 import InspectorObjectComponent from "./components/inspectorObjectComponent";
 import useStore from "@/app/store";
+import { useEffect, useState } from "react";
+import { GameObjectType } from "@/types/engineTypes";
+import { GameSceneEventEnums, InspectorEventEnums } from "@/enums/userEventEnums";
 
 export default function InspectorComponent() {
   const gameEngine = useStore((state) => state.gameEngine)!;
-  const updateInspectorObjects = useUpdateInspectorObjects();
+
+  const [gameObjects, setGameObjects] = useState<Array<GameObjectType>>(gameEngine.inspector.gameObjects)
+
+
+  useEffect(() => {
+    gameEngine.events.on(GameSceneEventEnums.dropedAsset, () => {
+      setGameObjects([...gameEngine.inspector.gameObjects])
+    })
+    gameEngine.events.on(InspectorEventEnums.deleteGameObject, () => {
+      setGameObjects([...gameEngine.inspector.gameObjects])
+    })
+  },[])
 
   const handleDrop = (e: React.DragEvent<HTMLUListElement>) => {
     e.preventDefault();
@@ -40,9 +53,9 @@ export default function InspectorComponent() {
         }}
         className="w-full h-full flex-grow  overflow-y-auto"
       >
-        {/* {objects.map((object, index) => (
+        {gameObjects.map((object, index) => (
           <InspectorObjectComponent key={index} object={object} />
-        ))} */}
+        ))}
       </ul>
     </aside>
   );

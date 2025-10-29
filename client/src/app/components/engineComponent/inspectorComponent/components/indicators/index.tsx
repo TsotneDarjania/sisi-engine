@@ -1,4 +1,4 @@
-import { InspectorObjectType } from "@/app/core/engine/inspector";
+import { GameObjectType } from "@/types/engineTypes";
 import { FaArrowRight } from "react-icons/fa";
 import { FiBox } from "react-icons/fi";
 import { IoMdMove } from "react-icons/io";
@@ -10,9 +10,9 @@ export default function InspectorObjectIndicators({
   deleteObject,
   isOpen,
 }: {
-  object: InspectorObjectType;
+  object: GameObjectType;
   toggle: () => void;
-  deleteObject: (objName: string) => void;
+  deleteObject: (id: string) => void;
   isOpen: boolean;
 }) {
   return (
@@ -51,7 +51,7 @@ export default function InspectorObjectIndicators({
         {/* Delete */}
         <MdDeleteForever
           onClick={() => {
-            deleteObject(object.name);
+            deleteObject(object.id);
           }}
           className="cursor-pointer"
           fontSize={"30px"}

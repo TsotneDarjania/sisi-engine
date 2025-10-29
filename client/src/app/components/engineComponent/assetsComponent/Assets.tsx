@@ -1,15 +1,10 @@
 "use client";
-
-import { MdDeleteForever } from "react-icons/md";
-import { IoMdMove } from "react-icons/io";
 import { IoAddCircleOutline } from "react-icons/io5";
 
-import { useRef, useState } from "react";
-import Image from "next/image";
-import GameEngine from "@/app/core";
-import { AssetType } from "@/app/core/engine/assets";
+import { useEffect, useRef, useState } from "react";
 import useStore from "@/app/store";
 import { AssetComponent } from "./assetComponent/AssetComponent";
+import { AssetEventEnums, AssetType } from "@/enums/userEventEnums";
 
 export default function AssetsComponent() {
   const gameEngine = useStore((state) => state.gameEngine)!;
@@ -22,17 +17,25 @@ export default function AssetsComponent() {
   }
 
   function deleteAsset(id: string) {
-    // gameEngine.deleteAsset(assetName);
-    // setAssets(gameEngine.getAllAsset());
+    gameEngine.assets.deleteAsset(id);
   }
 
   function addAsset(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (file) {
-      gameEngine.assets.addAsset(file)
+      gameEngine.assets.addAsset(file);
       event.target.value = "";
     }
   }
+
+  useEffect(() => {
+    gameEngine.events.on(AssetEventEnums.addAsset, () => {
+      setAssets([...gameEngine.assets.gameAssets]);
+    });
+    gameEngine.events.on(AssetEventEnums.deleteAsset, () => {
+      setAssets([...gameEngine.assets.gameAssets]);
+    });
+  }, []);
 
   return (
     <aside className="flex items-center h-screen flex-col border-2 border-gray-700">
@@ -41,7 +44,11 @@ export default function AssetsComponent() {
       </header>
       <ul className="flex flex-col items-center w-full">
         {assets.map((asset) => (
-          <AssetComponent asset={asset} deleteAsset={deleteAsset} />
+          <AssetComponent
+            key={asset.id}
+            asset={asset}
+            deleteAsset={deleteAsset}
+          />
         ))}
         <li className="w-full h-full">
           <input

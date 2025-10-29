@@ -4,6 +4,7 @@ import { ContainerChild } from "pixi.js";
 export type GameObjectType = {
   type: string;
   name: string;
+  id : string
   gameObject: ContainerChild;
   sceneData: {
     x: string;
@@ -17,8 +18,7 @@ export type GameObjectType = {
     ancor: [number, number];
   };
   scene: string;
-  assetFile: File;
-  assetSRC: string;
+  blobURL: string;
   childs: GameObjectType[];
 };
 
