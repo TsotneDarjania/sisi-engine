@@ -51,9 +51,12 @@ export default class GameEngine {
   public async createScene(parentDIV: HTMLDivElement) {
     this._engineScene = new EngineScene(this.events);
 
-    await this.engineScene.init(parentDIV, () => {
-      // this.onGameScreenResize();
-    });
+    await this.engineScene.init(
+      parentDIV,
+      () => {
+        this.inspector.canvas = this.engineScene.canvas;
+      },
+    );
   }
 
   get assets() {
@@ -68,8 +71,8 @@ export default class GameEngine {
     return this._events;
   }
 
-  get engineScene(){
-    return this._engineScene
+  get engineScene() {
+    return this._engineScene;
   }
 
   // public async addGameObject(
@@ -127,11 +130,6 @@ export default class GameEngine {
 
   // public findObjectByName(name: string) {
   //   return this.inspector.findObjectByName(name);
-  // }
-
-  // public onGameScreenResize() {
-  //   const { width, height } = this.engineScene.getSceneWidthAndHeight();
-  //   this.inspector.onGameSceneResize(width, height);
   // }
 
   // public async build(

@@ -1,20 +1,45 @@
 import { ContainerChild, Sprite } from "pixi.js";
 import EventManager from "../../eventManager";
-import { GameObjectType } from "@/types/engineTypes";
-import { AssetType, GameSceneEventEnums, InspectorEventEnums } from "@/enums/userEventEnums";
+import { ChangeOpbjectDataType, GameObjectType } from "@/types/engineTypes";
+import {
+  AssetType,
+  GameSceneEventEnums,
+  InspectorEventEnums,
+} from "@/enums/userEventEnums";
 import { uid } from "@/helper";
 
 export class Inspector {
   public gameObjects: Array<GameObjectType> = [];
+  private _canvas!: HTMLCanvasElement;
 
   constructor(public events: EventManager) {
     events.on(GameSceneEventEnums.dropedAsset, (data) => {
       this.addGameObject(data);
     });
+
+    document.addEventListener("fullscreenchange", () => {
+      if (document.fullscreenElement) {
+        this.onGameSceneResize()
+      } else {
+        this.onGameSceneResize()
+      }
+    });
   }
 
   private findObjectByID(id: string): GameObjectType | null {
     return this.findObjectByIDRecursive(this.gameObjects, id);
+  }
+
+  private removeObjectRecursive(
+    list: GameObjectType[],
+    targetID: string
+  ): GameObjectType[] {
+    return list
+      .filter((obj) => obj.id !== targetID)
+      .map((obj) => ({
+        ...obj,
+        childs: this.removeObjectRecursive(obj.childs, targetID),
+      }));
   }
 
   private findObjectByIDRecursive(
@@ -91,19 +116,98 @@ export class Inspector {
     target.gameObject.destroy(true);
     this.gameObjects = this.removeObjectRecursive(this.gameObjects, id);
 
-    this.events.emit(InspectorEventEnums.deleteGameObject, id)
+    this.events.emit(InspectorEventEnums.deleteGameObject, id);
   }
 
-  private removeObjectRecursive(
-    list: GameObjectType[],
-    targetID: string
-  ): GameObjectType[] {
-    return list
-      .filter((obj) => obj.id !== targetID)
-      .map((obj) => ({
-        ...obj,
-        childs: this.removeObjectRecursive(obj.childs, targetID),
-      }));
+  public changeObjectParameter(id: string, data: ChangeOpbjectDataType) {
+    const targetObj = this.findObjectByID(id);
+
+    if (!targetObj) {
+      throw new Error("targetObject is undefined");
+    }
+
+    // Helper function to support % values
+    const getNumericValue = (
+      value: string | number,
+      fullSize: number
+    ): number => {
+      if (typeof value === "string" && value.trimEnd().endsWith("%")) {
+        const cleaned = value.trimEnd().replace(/\s+%$/, "%").slice(0, -1);
+        const percent = parseFloat(cleaned);
+        if (!isNaN(percent)) {
+          return (fullSize * percent) / 100;
+        }
+      }
+      return Number(value);
+    };
+
+    switch (data.parameter) {
+      case "scale":
+        targetObj.sceneData.scale = Number(data.value);
+        targetObj.gameObject.scale.set(Number(data.value), Number(data.value));
+        break;
+
+      case "x":
+        targetObj.sceneData.x = String(data.value);
+        targetObj.gameObject.x = getNumericValue(
+          String(data.value),
+          this._canvas.width
+        );
+        break;
+
+      case "y":
+        targetObj.sceneData.y = String(data.value);
+        targetObj.gameObject.y = getNumericValue(
+          String(data.value),
+          this._canvas.height
+        );
+        break;
+
+      case "width":
+        targetObj.sceneData.width = String(data.value);
+        targetObj.gameObject.width = getNumericValue(
+          String(data.value),
+          this._canvas.width
+        );
+        break;
+
+      case "height":
+        targetObj.sceneData.height = String(data.value);
+        targetObj.gameObject.height = getNumericValue(
+          String(data.value),
+          this._canvas.height
+        );
+        break;
+
+      case "opacity":
+        targetObj.sceneData.opacity = Number(data.value);
+        targetObj.gameObject.alpha = Number(data.value);
+        break;
+
+      case "visible":
+        targetObj.sceneData.isActive = Boolean(data.value);
+        targetObj.gameObject.visible = Boolean(data.value);
+        break;
+
+      case "rotation":
+        targetObj.sceneData.rotation = Number(data.value);
+        targetObj.gameObject.rotation = Number(data.value);
+        break;
+
+      case "ancor":
+        targetObj.sceneData.ancor = data.value as [number, number];
+        (targetObj.gameObject as Sprite).anchor.set(
+          ...(data.value as [number, number])
+        );
+        break;
+
+      default:
+        console.error("Unknown Parameter:", data.parameter);
+    }
+  }
+
+  set canvas(canvas: HTMLCanvasElement) {
+    this._canvas = canvas;
   }
 
   // public combineObject(
@@ -165,153 +269,58 @@ export class Inspector {
   //   this.objects.push(childObject);
   // }
 
-
-
   // get AllObject() {
   //   return this.objects;
   // }
 
+  private onGameSceneResize() {
+    const objects = this.getAllObjectsFlat();
+    for (const obj of objects) {
+      this.updategGameObjects(obj.id, obj.sceneData);
+    }
+  }
 
-  // public findObjectByName(name: string): InspectorObjectType | null {
-  //   return this.findObjectByNameRecursive(this.objects, name);
-  // }
+  // When screen resize or whatever...
+  public updategGameObjects(
+    id: string,
+    sceneData: GameObjectType["sceneData"]
+  ) {
+    const targetObj = this.findObjectByID(id);
+    if (!targetObj) {
+      throw new Error("targetObject is undefined");
+    }
 
-  // public onGameSceneResize(sceneWidth: number, sceneHeight: number) {
-  //   const objects = this.getAllObjectsFlat();
-  //   for (const obj of objects) {
-  //     this.changeObjectBulk(obj.name, obj.sceneData, sceneWidth, sceneHeight);
-  //   }
-  // }
+    const getNumericValue = (
+      value: string | number,
+      fullSize: number
+    ): number => {
+      if (typeof value === "string" && value.trimEnd().endsWith("%")) {
+        const cleaned = value.trimEnd().replace(/\s+%$/, "%").slice(0, -1);
+        const percent = parseFloat(cleaned);
+        if (!isNaN(percent)) {
+          return (fullSize * percent) / 100;
+        }
+      }
+      return Number(value);
+    };
 
-  // public changeObjectBulk(
-  //   objName: string,
-  //   sceneData: InspectorObjectType["sceneData"],
-  //   sceneWidth: number,
-  //   sceneHeight: number
-  // ) {
-  //   const targetObj = this.findObjectByName(objName);
-  //   if (!targetObj) {
-  //     throw new Error("targetObject is undefined");
-  //   }
+    const sceneWidth = this._canvas.width;
+    const sceneHeight = this._canvas.height;
 
-  //   const getNumericValue = (
-  //     value: string | number,
-  //     fullSize: number
-  //   ): number => {
-  //     if (typeof value === "string" && value.trimEnd().endsWith("%")) {
-  //       const cleaned = value.trimEnd().replace(/\s+%$/, "%").slice(0, -1);
-  //       const percent = parseFloat(cleaned);
-  //       if (!isNaN(percent)) {
-  //         return (fullSize * percent) / 100;
-  //       }
-  //     }
-  //     return Number(value);
-  //   };
+    console.log(sceneWidth, sceneHeight, "!!!!!!!!!!!!!!!!!!!!!!!")
 
-  //   // Apply all values from sceneData
-  //   targetObj.sceneData = { ...sceneData };
-  //   targetObj.gameObject.x = getNumericValue(sceneData.x, sceneWidth);
-  //   targetObj.gameObject.y = getNumericValue(sceneData.y, sceneHeight);
-  //   targetObj.gameObject.width = getNumericValue(sceneData.width, sceneWidth);
-  //   targetObj.gameObject.height = getNumericValue(
-  //     sceneData.height,
-  //     sceneHeight
-  //   );
+    // Apply all values from sceneData
+    targetObj.sceneData = { ...sceneData };
+    targetObj.gameObject.x = getNumericValue(sceneData.x, sceneWidth);
+    targetObj.gameObject.y = getNumericValue(sceneData.y, sceneHeight);
+    targetObj.gameObject.width = getNumericValue(sceneData.width, sceneWidth);
+    targetObj.gameObject.height = getNumericValue(
+      sceneData.height,
+      sceneHeight
+    );
 
-  //   targetObj.gameObject.scale.set(sceneData.scale, sceneData.scale);
-  //   targetObj.gameObject.alpha = sceneData.opacity;
-  //   targetObj.gameObject.visible = sceneData.isActive;
-  // }
-
-  // public changeObjectParameter(
-  //   objName: string,
-  //   data: ChangeOpbjectDataType,
-  //   sceneWidth: number,
-  //   sceneHeight: number
-  // ) {
-  //   const targetObj = this.findObjectByName(objName);
-
-  //   if (!targetObj) {
-  //     throw new Error("targetObject is undefined");
-  //   }
-
-  //   // Helper function to support % values
-  //   const getNumericValue = (
-  //     value: string | number,
-  //     fullSize: number
-  //   ): number => {
-  //     if (typeof value === "string" && value.trimEnd().endsWith("%")) {
-  //       const cleaned = value.trimEnd().replace(/\s+%$/, "%").slice(0, -1);
-  //       const percent = parseFloat(cleaned);
-  //       if (!isNaN(percent)) {
-  //         return (fullSize * percent) / 100;
-  //       }
-  //     }
-  //     return Number(value);
-  //   };
-
-  //   switch (data.parameter) {
-  //     case "scale":
-  //       targetObj.sceneData.scale = Number(data.value);
-  //       targetObj.gameObject.scale.set(Number(data.value), Number(data.value));
-  //       break;
-
-  //     case "x":
-  //       targetObj.sceneData.x = String(data.value);
-  //       targetObj.gameObject.x = getNumericValue(
-  //         String(data.value),
-  //         sceneWidth
-  //       );
-  //       break;
-
-  //     case "y":
-  //       targetObj.sceneData.y = String(data.value);
-  //       targetObj.gameObject.y = getNumericValue(
-  //         String(data.value),
-  //         sceneHeight
-  //       );
-  //       break;
-
-  //     case "width":
-  //       targetObj.sceneData.width = String(data.value);
-  //       targetObj.gameObject.width = getNumericValue(
-  //         String(data.value),
-  //         sceneWidth
-  //       );
-  //       break;
-
-  //     case "height":
-  //       targetObj.sceneData.height = String(data.value);
-  //       targetObj.gameObject.height = getNumericValue(
-  //         String(data.value),
-  //         sceneHeight
-  //       );
-  //       break;
-
-  //     case "opacity":
-  //       targetObj.sceneData.opacity = Number(data.value);
-  //       targetObj.gameObject.alpha = Number(data.value);
-  //       break;
-
-  //     case "visible":
-  //       targetObj.sceneData.isActive = Boolean(data.value);
-  //       targetObj.gameObject.visible = Boolean(data.value);
-  //       break;
-
-  //     case "rotation":
-  //       targetObj.sceneData.rotation = Number(data.value);
-  //       targetObj.gameObject.rotation = Number(data.value);
-  //       break;
-
-  //     case "ancor":
-  //       targetObj.sceneData.ancor = data.value as [number, number];
-  //       (targetObj.gameObject as Sprite).anchor.set(
-  //         ...(data.value as [number, number])
-  //       );
-  //       break;
-
-  //     default:
-  //       console.error("Unknown Parameter:", data.parameter);
-  //   }
-  // }
+    targetObj.gameObject.scale.set(sceneData.scale, sceneData.scale);
+    targetObj.gameObject.alpha = sceneData.opacity;
+    targetObj.gameObject.visible = sceneData.isActive;
+  }
 }

@@ -1,14 +1,13 @@
 "use client";
 
-import { InspectorObjectType } from "@/app/core/engine/inspector";
 import { useState } from "react";
 import { FaArrowRight } from "react-icons/fa";
 import InspectorObjectComponent from "../inspectorObjectComponent";
-import { GameObjectParameterType } from "@/app/core";
 import { Sprite } from "pixi.js";
+import { GameObjectParameterType, GameObjectType } from "@/types/engineTypes";
 
 export type PropertiesComponentType = {
-  obj: InspectorObjectType;
+  obj: GameObjectType;
   changeObjectParameter: (
     parameter: GameObjectParameterType,
     objName: string,
@@ -34,7 +33,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
           onChange={(e) => {
             props.changeObjectParameter(
               "scale",
-              props.obj.name,
+              props.obj.id,
               e.currentTarget.value
             );
           }}
@@ -49,7 +48,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
           onChange={(e) => {
             props.changeObjectParameter(
               "x",
-              props.obj.name,
+              props.obj.id,
               e.currentTarget.value
             );
           }}
@@ -64,7 +63,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
           onChange={(e) => {
             props.changeObjectParameter(
               "y",
-              props.obj.name,
+              props.obj.id,
               e.currentTarget.value
             );
           }}
@@ -79,7 +78,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
           onChange={(e) => {
             props.changeObjectParameter(
               "width",
-              props.obj.name,
+              props.obj.id,
               e.currentTarget.value
             );
           }}
@@ -94,7 +93,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
           onChange={(e) => {
             props.changeObjectParameter(
               "height",
-              props.obj.name,
+              props.obj.id,
               e.currentTarget.value
             );
           }}
@@ -109,7 +108,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
           onChange={(e) => {
             props.changeObjectParameter(
               "rotation",
-              props.obj.name,
+              props.obj.id,
               e.currentTarget.value
             );
           }}
@@ -123,7 +122,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
             defaultValue={(props.obj.gameObject as Sprite).anchor.x}
             type="number"
             onChange={(e) => {
-              props.changeObjectParameter("ancor", props.obj.name, [
+              props.changeObjectParameter("ancor", props.obj.id, [
                 Number(e.currentTarget.value),
                 props.obj.gameObject.pivot.y,
               ]);
@@ -134,7 +133,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
             defaultValue={(props.obj.gameObject as Sprite).anchor.y}
             type="number"
             onChange={(e) => {
-              props.changeObjectParameter("ancor", props.obj.name, [
+              props.changeObjectParameter("ancor", props.obj.id, [
                 props.obj.gameObject.pivot.x,
                 Number(e.currentTarget.value),
               ]);
@@ -151,7 +150,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
           onChange={(e) => {
             props.changeObjectParameter(
               "opacity",
-              props.obj.name,
+              props.obj.id,
               e.currentTarget.value
             );
           }}
@@ -166,7 +165,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
           onChange={(e) => {
             props.changeObjectParameter(
               "visible",
-              props.obj.name,
+              props.obj.id,
               e.currentTarget.checked
             );
           }}

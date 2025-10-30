@@ -22,20 +22,23 @@ export class EngineScene {
     return this.parentDIV;
   }
 
-  get stage() {
-    return this.app.stage;
+  get canvas() {
+    return this.app?.canvas;
   }
 
-  public async init(parentDIV: HTMLDivElement, onResizeCallBack: () => void) {
+  public async init(parentDIV: HTMLDivElement, onCreated : () => void) {
     this.parentDIV = parentDIV;
     this.app = new Application();
     await this.app.init({
       background: this.canvasBackgroundColor,
       resizeTo: this.parentDIV,
     });
+
+    onCreated();
+    
     this.app.renderer.on("resize", () => {
-      // this.onResize();
-      onResizeCallBack();
+      this.onResize();
+      // onResizeCallBack();
     });
     this.parentDIV.appendChild(this.app.canvas);
     this.addSceneIndicators();
@@ -90,12 +93,12 @@ export class EngineScene {
   //   };
   // }
 
-  // private onResize() {
-  //   if (this.sceneIndicators) {
-  //     this.sceneIndicators.onResize(
-  //       this.app.renderer.width,
-  //       this.app.renderer.height
-  //     );
-  //   }
-  // }
+  private onResize() {
+    if (this.sceneIndicators) {
+      this.sceneIndicators.onResize(
+        this.app.renderer.width,
+        this.app.renderer.height
+      );
+    }
+  }
 }

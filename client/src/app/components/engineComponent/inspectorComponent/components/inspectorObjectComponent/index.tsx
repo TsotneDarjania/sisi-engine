@@ -39,13 +39,13 @@ export default function InspectorObjectComponent({
 
   const changeObjectParameter = (
     parameter: GameObjectParameterType,
-    objName: string,
+    id: string,
     value: string | number | boolean | [number, number]
   ) => {
-    // gameEngine.changeGameobjectFromInspector(objName, {
-    //   parameter,
-    //   value,
-    // });
+    gameEngine.inspector.changeObjectParameter(id, {
+      parameter,
+      value
+    });
   };
 
   const handleDrop = (e: React.DragEvent<HTMLLIElement>) => {
