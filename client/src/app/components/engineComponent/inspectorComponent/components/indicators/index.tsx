@@ -30,9 +30,8 @@ export default function InspectorObjectIndicators({
         <div
           draggable
           onDragStart={(e) => {
-            console.log("drag");
             e.dataTransfer.setData("origin", "inspector");
-            e.dataTransfer.setData("object_name", object.name);
+            e.dataTransfer.setData("object_id", object.id);
           }}
           className="cursor-pointer inline-block"
         >

@@ -12,7 +12,6 @@ export type GameObjectType = {
     width: string;
     height: string;
     opacity: number;
-    scale: number;
     isActive: boolean;
     rotation: number;
     ancor: [number, number];
@@ -36,4 +35,5 @@ export type GameObjectParameterType =
   | "opacity"
   | "visible"
   | "rotation"
-  | "ancor";
+  | "ancor_x"
+  | "ancor_y";

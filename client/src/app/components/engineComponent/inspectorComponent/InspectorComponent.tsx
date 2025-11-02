@@ -3,41 +3,45 @@ import InspectorObjectComponent from "./components/inspectorObjectComponent";
 import useStore from "@/app/store";
 import { useEffect, useState } from "react";
 import { GameObjectType } from "@/types/engineTypes";
-import { GameSceneEventEnums, InspectorEventEnums } from "@/enums/userEventEnums";
+import {
+  GameSceneEventEnums,
+  InspectorEventEnums,
+} from "@/enums/userEventEnums";
 
 export default function InspectorComponent() {
   const gameEngine = useStore((state) => state.gameEngine)!;
 
-  const [gameObjects, setGameObjects] = useState<Array<GameObjectType>>(gameEngine.inspector.gameObjects)
-
+  const [gameObjects, setGameObjects] = useState<Array<GameObjectType>>(
+    gameEngine.inspector.gameObjects
+  );
 
   useEffect(() => {
     gameEngine.events.on(GameSceneEventEnums.dropedAsset, () => {
-      setGameObjects([...gameEngine.inspector.gameObjects])
-    })
+      setGameObjects([...gameEngine.inspector.gameObjects]);
+    });
     gameEngine.events.on(InspectorEventEnums.deleteGameObject, () => {
-      setGameObjects([...gameEngine.inspector.gameObjects])
-    })
-  },[])
+      setGameObjects([...gameEngine.inspector.gameObjects]);
+    });
+    gameEngine.events.on(InspectorEventEnums.combineObjects, () => {
+      setGameObjects([...gameEngine.inspector.gameObjects]);
+    });
+    gameEngine.events.on(InspectorEventEnums.removeFromParent, () => {
+      setGameObjects([...gameEngine.inspector.gameObjects]);
+    });
+  }, []);
 
   const handleDrop = (e: React.DragEvent<HTMLUListElement>) => {
     e.preventDefault();
 
-    // const origin = e.dataTransfer.getData("origin");
-    // const childObjectName = e.dataTransfer.getData("object_name");
+    const origin = e.dataTransfer.getData("origin");
+    const childObjecID = e.dataTransfer.getData("object_id");
 
-    // if (origin !== "inspector") {
-    //   console.log("Ignored drop from non-inspector");
-    //   return;
-    // }
+    if (origin !== "inspector") {
+      console.log("Ignored drop from non-inspector");
+      return;
+    }
 
-    // const childObject = gameEngine.findObjectByName(childObjectName);
-    // if (!childObject) {
-    //   throw new Error("can not find child object");
-    // }
-
-    // gameEngine.removeFromParent(childObject);
-    // updateInspectorObjects();
+    gameEngine.inspector.removeFromParent(childObjecID)
   };
 
   return (

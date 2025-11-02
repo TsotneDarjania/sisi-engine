@@ -53,31 +53,14 @@ export default function InspectorObjectComponent({
     e.stopPropagation();
 
     const origin = e.dataTransfer.getData("origin");
-    const childObjectName = e.dataTransfer.getData("object_name");
+    const childObjectID = e.dataTransfer.getData("object_id");
 
     if (origin !== "inspector") {
       console.log("Ignored drop from non-inspector");
       return;
     }
 
-    if (object.childs.find((obj) => obj.name === childObjectName)) {
-      console.warn("dont try to repeate same...");
-      return;
-    }
-
-    if (object.name === childObjectName) {
-      console.warn("can not drop into same object");
-      return;
-    }
-
-    // const childObject = gameEngine.findObjectByName(childObjectName);
-
-    // if (childObject) {
-    //   gameEngine.combineInspectorObjects(childObject, object);
-    //   updateInspectorObjects();
-    // } else {
-    //   throw new Error("child object is undefined");
-    // }
+    gameEngine.inspector.combineObject(childObjectID, object.id)
   };
 
   return (

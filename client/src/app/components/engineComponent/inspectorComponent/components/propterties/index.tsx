@@ -25,21 +25,6 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
   return (
     <ul className="w-full text-white mt-3 transition-all">
       <li className="flex justify-between">
-        <label>Scale :</label>
-        <input
-          className="text-center border"
-          defaultValue={props.obj.gameObject.scale.x}
-          type="number"
-          onChange={(e) => {
-            props.changeObjectParameter(
-              "scale",
-              props.obj.id,
-              e.currentTarget.value
-            );
-          }}
-        />
-      </li>
-      <li className="flex justify-between">
         <label>Pos X :</label>
         <input
           className="text-center border"
@@ -122,10 +107,11 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
             defaultValue={(props.obj.gameObject as Sprite).anchor.x}
             type="number"
             onChange={(e) => {
-              props.changeObjectParameter("ancor", props.obj.id, [
+              props.changeObjectParameter(
+                "ancor_x",
+                props.obj.id,
                 Number(e.currentTarget.value),
-                props.obj.gameObject.pivot.y,
-              ]);
+              );
             }}
           />
           <input
@@ -133,10 +119,11 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
             defaultValue={(props.obj.gameObject as Sprite).anchor.y}
             type="number"
             onChange={(e) => {
-              props.changeObjectParameter("ancor", props.obj.id, [
-                props.obj.gameObject.pivot.x,
-                Number(e.currentTarget.value),
-              ]);
+              props.changeObjectParameter(
+                "ancor_y",
+                props.obj.id,
+                Number(e.currentTarget.value)
+              );
             }}
           />
         </div>

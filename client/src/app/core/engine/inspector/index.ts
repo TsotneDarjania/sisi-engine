@@ -7,6 +7,7 @@ import {
   InspectorEventEnums,
 } from "@/enums/userEventEnums";
 import { uid } from "@/helper";
+import { error } from "console";
 
 export class Inspector {
   public gameObjects: Array<GameObjectType> = [];
@@ -16,13 +17,8 @@ export class Inspector {
     events.on(GameSceneEventEnums.dropedAsset, (data) => {
       this.addGameObject(data);
     });
-
-    document.addEventListener("fullscreenchange", () => {
-      if (document.fullscreenElement) {
-        this.onGameSceneResize()
-      } else {
-        this.onGameSceneResize()
-      }
+    events.on(GameSceneEventEnums.resizeCanvas, ({ width, height }) => {
+      this.onGameSceneResize(width, height);
     });
   }
 
@@ -84,6 +80,14 @@ export class Inspector {
     return fileName;
   }
 
+  private containsId(root: GameObjectType, targetId: string): boolean {
+    if (root.id === targetId) return true;
+    for (const c of root.childs ?? []) {
+      if (this.containsId(c, targetId)) return true;
+    }
+    return false;
+  }
+
   public addGameObject(data: { asset: AssetType; pixiObject: ContainerChild }) {
     this.gameObjects.push({
       type: data.asset.type,
@@ -98,7 +102,6 @@ export class Inspector {
         y: String(data.pixiObject.y),
         width: String(data.pixiObject.width),
         height: String(data.pixiObject.height),
-        scale: data.pixiObject.scale.x,
         opacity: data.pixiObject.alpha,
         isActive: data.pixiObject.visible,
         rotation: data.pixiObject.rotation,
@@ -142,11 +145,6 @@ export class Inspector {
     };
 
     switch (data.parameter) {
-      case "scale":
-        targetObj.sceneData.scale = Number(data.value);
-        targetObj.gameObject.scale.set(Number(data.value), Number(data.value));
-        break;
-
       case "x":
         targetObj.sceneData.x = String(data.value);
         targetObj.gameObject.x = getNumericValue(
@@ -194,10 +192,19 @@ export class Inspector {
         targetObj.gameObject.rotation = Number(data.value);
         break;
 
-      case "ancor":
-        targetObj.sceneData.ancor = data.value as [number, number];
+      case "ancor_x":
+        targetObj.sceneData.ancor[0] = data.value as number;
         (targetObj.gameObject as Sprite).anchor.set(
-          ...(data.value as [number, number])
+          targetObj.sceneData.ancor[0],
+          targetObj.sceneData.ancor[1]
+        );
+        break;
+
+      case "ancor_y":
+        targetObj.sceneData.ancor[1] = data.value as number;
+        (targetObj.gameObject as Sprite).anchor.set(
+          targetObj.sceneData.ancor[0],
+          targetObj.sceneData.ancor[1]
         );
         break;
 
@@ -210,80 +217,132 @@ export class Inspector {
     this._canvas = canvas;
   }
 
-  // public combineObject(
-  //   child: InspectorObjectType,
-  //   parent: InspectorObjectType
-  // ) {
-  //   // Remove child from tree (this creates new object tree)
-  //   this.objects = this.removeObjectRecursive(this.objects, child.name);
+  /**
+   * Removes a GameObject from its current parent and moves it back to the root
+   */
+  public removeFromParent(childID: string) {
+    const child = this.findObjectByID(childID);
+    if (!child) {
+      throw Error(`Child object with id ${childID} not found`);
+    }
 
-  //   // Refetch updated parent from fresh tree
-  //   const updatedParent = this.findObjectByName(parent.name);
-  //   if (!updatedParent) {
-  //     throw new Error("Parent object not found after tree update");
-  //   }
+    // 1) Find the parent of this child inside the object tree
+    const findParent = (
+      list: GameObjectType[],
+      targetId: string
+    ): GameObjectType | null => {
+      for (const obj of list) {
+        if (obj.childs?.some((c) => c.id === targetId)) {
+          return obj;
+        }
+        const nested = findParent(obj.childs ?? [], targetId);
+        if (nested) return nested;
+      }
+      return null;
+    };
 
-  //   // Attach child to updated parent
-  //   updatedParent.childs.push(child);
-  //   updatedParent.gameObject.addChild(child.gameObject);
-  // }
+    const parent = findParent(this.gameObjects, childID);
 
-  // private findParentRecursive(
-  //   list: InspectorObjectType[],
-  //   childName: string
-  // ): InspectorObjectType | null {
-  //   for (const obj of list) {
-  //     if (obj.childs.some((child) => child.name === childName)) {
-  //       return obj;
-  //     }
+    if (!parent) {
+      // No parent found: already at root — nothing to do
+      console.warn(`Child ${childID} is already a root object`);
+      return;
+    }
 
-  //     const foundInChild = this.findParentRecursive(obj.childs, childName);
-  //     if (foundInChild) return foundInChild;
-  //   }
+    // 2) Remove the child logic-side from its parent
+    parent.childs = parent.childs.filter((c) => c.id !== childID);
 
-  //   return null;
-  // }
+    // 3) Add it back to root level
+    this.gameObjects.push(child);
 
-  // public removeFromParent(
-  //   childObject: InspectorObjectType,
-  //   mainStage: ContainerChild
-  // ): void {
-  //   const parent = this.findParentRecursive(this.objects, childObject.name);
+    // 4) Update PIXI scene graph: remove from old parent, add to stage
+    const childPixi = child.gameObject as any;
+    const parentPixi = parent.gameObject as any;
+    const stage = parentPixi?.stage || parentPixi?.parent?.stage; // depends on how you pass the root
+    if (parentPixi?.removeChild && childPixi) {
+      parentPixi.removeChild(childPixi);
+    }
+    if (stage?.addChild) {
+      stage.addChild(childPixi);
+    } else {
+      console.warn(
+        "Could not find valid stage in removeFromParent: make sure Inspector has access to PIXI app.stage"
+      );
+    }
 
-  //   if (!parent) {
-  //     // If not found, it's already a top-level object — do nothing
-  //     console.warn("Child has no parent. It's already top-level.");
-  //     return;
-  //   }
+    this.events.emit(InspectorEventEnums.removeFromParent, { childID });
+  }
 
-  //   // Remove from parent's childs array
-  //   parent.childs = parent.childs.filter(
-  //     (child) => child.name !== childObject.name
-  //   );
+  public combineObject(childID: string, parentID: string) {
+    if (childID === parentID) {
+      throw Error("Cannot combine: parent and child IDs are the same.");
+    }
 
-  //   // Remove from parent's PIXI container
-  //   parent.gameObject.removeChild(childObject.gameObject);
-  //   mainStage.addChild(childObject.gameObject);
+    const childObject = this.findObjectByID(childID);
+    const parentObject = this.findObjectByID(parentID);
 
-  //   // Optionally: push child to top-level (to make it independent again)
-  //   this.objects.push(childObject);
-  // }
+    if (!parentObject || !childObject) {
+      console.warn(
+        `parent - ${parentID} or child - ${childID} object did not found`
+      );
+      return;
+    }
 
-  // get AllObject() {
-  //   return this.objects;
-  // }
+    // guard against cycles: don't attach under your own descendant
+    if (this.containsId(childObject, parentID)) {
+      console.warn(
+        "Cannot combine: target parent is inside child's subtree (cycle)."
+      );
+      return;
+    }
 
-  private onGameSceneResize() {
+    // --- keep PIXI scene graph in sync: detach child from its current PIXI parent
+    const childPixi = childObject.gameObject as any;
+    const oldPixiParent = childPixi?.parent;
+    if (oldPixiParent?.removeChild) {
+      oldPixiParent.removeChild(childPixi);
+    }
+
+    // 1) Remove child from our logical tree (this may rebuild branches)
+    this.gameObjects = this.removeObjectRecursive(
+      this.gameObjects,
+      childObject.id
+    );
+
+    // 2) Re-find parent on the UPDATED tree to avoid stale reference
+    const parentNow = this.findObjectByID(parentID);
+    if (!parentNow) {
+      // very defensive; should not happen because we blocked cycles
+      console.warn(`Parent ${parentID} was not found after restructuring.`);
+      return;
+    }
+
+    // 3) Attach child to the new parent in our logical tree
+    if (!Array.isArray(parentNow.childs)) parentNow.childs = [];
+    parentNow.childs.push(childObject);
+
+    // 4) Attach in PIXI graph too (if parent supports addChild)
+    const parentPixi = parentNow.gameObject as any;
+    if (parentPixi?.addChild) {
+      parentPixi.addChild(childPixi);
+    }
+
+    this.events.emit(InspectorEventEnums.combineObjects, { parentID, childID });
+  }
+
+  public onGameSceneResize(sceneWidth: number, sceneHeight: number) {
     const objects = this.getAllObjectsFlat();
     for (const obj of objects) {
-      this.updategGameObjects(obj.id, obj.sceneData);
+      this.updategGameObjects(obj.id, obj.sceneData, sceneWidth, sceneHeight);
     }
   }
 
   // When screen resize or whatever...
   public updategGameObjects(
     id: string,
-    sceneData: GameObjectType["sceneData"]
+    sceneData: GameObjectType["sceneData"],
+    sceneWidth: number,
+    sceneHeight: number
   ) {
     const targetObj = this.findObjectByID(id);
     if (!targetObj) {
@@ -304,11 +363,6 @@ export class Inspector {
       return Number(value);
     };
 
-    const sceneWidth = this._canvas.width;
-    const sceneHeight = this._canvas.height;
-
-    console.log(sceneWidth, sceneHeight, "!!!!!!!!!!!!!!!!!!!!!!!")
-
     // Apply all values from sceneData
     targetObj.sceneData = { ...sceneData };
     targetObj.gameObject.x = getNumericValue(sceneData.x, sceneWidth);
@@ -319,7 +373,6 @@ export class Inspector {
       sceneHeight
     );
 
-    targetObj.gameObject.scale.set(sceneData.scale, sceneData.scale);
     targetObj.gameObject.alpha = sceneData.opacity;
     targetObj.gameObject.visible = sceneData.isActive;
   }

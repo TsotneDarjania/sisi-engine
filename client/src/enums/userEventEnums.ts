@@ -8,11 +8,14 @@ export enum AssetEventEnums {
 export enum GameSceneEventEnums {
   selectObject = "selectObject",
   dropedAsset = "dropedAsset",
+  resizeCanvas = "resizeCanvas",
 }
 
 export enum InspectorEventEnums {
   deleteGameObject = "deleteGameObject",
   changeObject = "changeObject",
+  combineObjects = "combineObjects",
+  removeFromParent = "removeFromParent",
 }
 
 export type UserEventEnums =
@@ -34,10 +37,16 @@ export type EventPayloads = {
     objectId: string;
     multiSelect?: boolean;
   };
-  [GameSceneEventEnums.dropedAsset]: {asset :AssetType, pixiObject : ContainerChild};
+  [GameSceneEventEnums.dropedAsset]: {
+    asset: AssetType;
+    pixiObject: ContainerChild;
+  };
+  [GameSceneEventEnums.resizeCanvas]: { width: number; height: number };
   [InspectorEventEnums.changeObject]: {
     objectId: string;
     changes: Record<string, any>;
   };
   [InspectorEventEnums.deleteGameObject]: string;
+  [InspectorEventEnums.combineObjects]: { parentID: string; childID: string };
+  [InspectorEventEnums.removeFromParent]: { childID: string };
 };

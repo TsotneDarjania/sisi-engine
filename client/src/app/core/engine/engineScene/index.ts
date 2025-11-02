@@ -38,7 +38,8 @@ export class EngineScene {
     
     this.app.renderer.on("resize", () => {
       this.onResize();
-      // onResizeCallBack();
+      this.events.emit(GameSceneEventEnums.resizeCanvas, {width: this.app.renderer.width, height: this.app.renderer.height})
+  
     });
     this.parentDIV.appendChild(this.app.canvas);
     this.addSceneIndicators();

@@ -51,12 +51,9 @@ export default class GameEngine {
   public async createScene(parentDIV: HTMLDivElement) {
     this._engineScene = new EngineScene(this.events);
 
-    await this.engineScene.init(
-      parentDIV,
-      () => {
-        this.inspector.canvas = this.engineScene.canvas;
-      },
-    );
+    await this.engineScene.init(parentDIV, () => {
+      this.inspector.canvas = this.engineScene.canvas;
+    });
   }
 
   get assets() {
