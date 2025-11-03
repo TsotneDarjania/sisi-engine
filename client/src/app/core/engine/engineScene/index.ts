@@ -87,13 +87,6 @@ export class EngineScene {
     }
   }
 
-  // public getSceneWidthAndHeight() {
-  //   return {
-  //     width: this.app.canvas.width,
-  //     height: this.app.canvas.height,
-  //   };
-  // }
-
   private onResize() {
     if (this.sceneIndicators) {
       this.sceneIndicators.onResize(

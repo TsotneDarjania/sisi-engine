@@ -1,11 +1,11 @@
+import { GameObjectType } from "@/types/engineTypes";
 import { Sprite } from "pixi.js";
-import { InspectorObjectType } from "../engine/inspector";
 
 export class Builder {
-  private mapObjectToJSON(obj: InspectorObjectType): any {
+  private mapObjectToJSON(obj: GameObjectType): any {
     return {
       type: obj.type,
-      src: `/game-assets/${obj.assetSRC}`,
+      src: `/game-assets/${obj.blobURL}`,
       childs: obj.childs.map((child) => this.mapObjectToJSON(child)), // ✅ recursion
       data: {
         x: obj.gameObject.x,
@@ -26,7 +26,7 @@ export class Builder {
   }
 
   public generateJSON(
-    objects: InspectorObjectType[],
+    objects: GameObjectType[],
     canvas: {
       backgroundColor: string;
     },

@@ -8,6 +8,7 @@ import { Signal } from "./state/signal";
 import EventManager from "./eventManager";
 import { GameObjectType } from "@/types/engineTypes";
 import { EventPayloads } from "@/enums/userEventEnums";
+import { setupRuntime } from "@/runtime/src/main";
 
 export default class GameEngine {
   private _assets!: Assets;
@@ -72,134 +73,96 @@ export default class GameEngine {
     return this._engineScene;
   }
 
-  // public async addGameObject(
-  //   name: string,
-  //   srcURL: string,
-  //   type: string,
-  //   file: File
-  // ) {
-  //   const newObj = await this.engineScene.addGameObject(srcURL);
-  //   this.inspector.addObject(type, name, newObj, this.currentSceneName.value, file);
-  // }
+  public playScene() {
+    const sceneJson = this.builder.generateJSON(
+      this.inspector.gameObjects,
+      {
+        backgroundColor: this.engineScene.backgroundColor,
+      },
+      {
+        width : this.engineScene.canvas.width,
+        height : this.engineScene.canvas.height,
+        isFullScreenWidth : false,
+        isFullScreenHeight : false,
+      }
+    );
 
-  // public changeGameobjectFromInspector(
-  //   objName: string,
-  //   data: ChangeOpbjectDataType
-  // ) {
-  //   const { width, height } = this.engineScene.getSceneWidthAndHeight();
-  //   this.inspector.changeObjectParameter(objName, data, width, height);
-  // }
+    setupRuntime(JSON.parse(sceneJson));
+  }
 
-  // public getAllAsset(): Array<AssetType> {
-  //   return this.assets.getAllAsset();
-  // }
+  public async build(
+    width: number,
+    height: number,
+    isFullScreenWidth: boolean,
+    isFullScreenHeight: boolean
+  ) {
+    const sceneJson = this.builder.generateJSON(
+      this.inspector.gameObjects,
+      {
+        backgroundColor: this.engineScene.backgroundColor,
+      },
+      {
+        width,
+        height,
+        isFullScreenWidth,
+        isFullScreenHeight,
+      }
+    );
 
-  // public getAssetByName(name: string): AssetType | undefined {
-  //   return this.assets.getAssetByName(name);
-  // }
+    // runtimeStart(JSON.parse(sceneJson));
 
-  // public getAllInspectorObject() {
-  //   return this.inspector.AllObject;
-  // }
+    // const zip = new JSZip();
 
-  // public addNewAsset(file: File) {
-  //   this.assets.addNewAsset(file);
-  // }
+    // // 👉 Fetch player template files from public URL space (served statically)
+    // const indexHtml = await fetch("/runtime-template/index.html").then((r) =>
+    //   r.text()
+    // );
+    // zip.file("index.html", indexHtml);
 
-  // public deleteAsset(assetName: string) {
-  //   this.assets.deleteAsset(assetName);
-  // }
+    // const styleCss = await fetch("/runtime-template/style.css").then((r) =>
+    //   r.text()
+    // );
+    // zip.file("style.css", styleCss);
 
-  // public combineInspectorObjects(
-  //   child: InspectorObjectType,
-  //   parent: InspectorObjectType
-  // ) {
-  //   this.inspector.combineObject(child, parent);
-  // }
+    // const assetFiles = [
+    //   "browserAll.js",
+    //   // "colorToUniform.js",
+    //   "index.js",
+    //   // "SharedSystems.js",
+    //   // "WebGLRenderer.js",
+    //   // "WebGPURenderer.js",
+    //   "webworkerAll.js",
+    //   // Add any additional files if needed
+    // ];
 
-  // public removeFromParent(childObject: InspectorObjectType) {
-  //   this.inspector.removeFromParent(childObject, this.engineScene.stage);
-  // }
+    // const assetsFolder = zip.folder("assets");
+    // for (const filename of assetFiles) {
+    //   const content = await fetch(`/runtime-template/assets/${filename}`).then(
+    //     (r) => r.blob()
+    //   );
+    //   assetsFolder!.file(filename, content);
+    // }
 
-  // public deleteObject(objName: string) {
-  //   this.inspector.deleteObject(objName);
-  // }
+    // // 👉 Add dynamic scene.json
+    // zip.file("scene.json", sceneJson);
 
-  // public findObjectByName(name: string) {
-  //   return this.inspector.findObjectByName(name);
-  // }
+    // // 👉 Add user-uploaded game assets reliably using stored File objects
+    // const gameAssetsFolder = zip.folder("game-assets");
 
-  // public async build(
-  //   width: number,
-  //   height: number,
-  //   isFullScreenWidth: boolean,
-  //   isFullScreenHeight: boolean
-  // ) {
-  //   const sceneJson = this.builder.generateJSON(
-  //     this.inspector.AllObject,
-  //     {
-  //       backgroundColor: this.engineScene.backgroundColor,
-  //     },
-  //     {
-  //       width,
-  //       height,
-  //       isFullScreenWidth,
-  //       isFullScreenHeight,
-  //     }
-  //   );
+    // const usedAssets = this.inspector.gameObjects.map((obj) => ({
+    //   file: obj.assetFile, // <-- Using directly stored File object now!
+    //   fileName: obj.assetSRC, // Optionally sanitize this if needed
+    // }));
 
-  //   const zip = new JSZip();
+    // for (const asset of usedAssets) {
+    //   gameAssetsFolder!.file(asset.fileName, asset.file);
+    // }
 
-  //   // 👉 Fetch player template files from public URL space (served statically)
-  //   const indexHtml = await fetch("/runtime-template/index.html").then((r) =>
-  //     r.text()
-  //   );
-  //   zip.file("index.html", indexHtml);
+    // // 👉 Generate zip and trigger download
+    // zip.generateAsync({ type: "blob" }).then((content) => {
+    //   saveAs(content, "my-pixi-game.zip");
+    // });
 
-  //   const styleCss = await fetch("/runtime-template/style.css").then((r) =>
-  //     r.text()
-  //   );
-  //   zip.file("style.css", styleCss);
-
-  //   const assetFiles = [
-  //     "browserAll.js",
-  //     // "colorToUniform.js",
-  //     "index.js",
-  //     // "SharedSystems.js",
-  //     // "WebGLRenderer.js",
-  //     // "WebGPURenderer.js",
-  //     "webworkerAll.js",
-  //     // Add any additional files if needed
-  //   ];
-
-  //   const assetsFolder = zip.folder("assets");
-  //   for (const filename of assetFiles) {
-  //     const content = await fetch(`/runtime-template/assets/${filename}`).then(
-  //       (r) => r.blob()
-  //     );
-  //     assetsFolder!.file(filename, content);
-  //   }
-
-  //   // 👉 Add dynamic scene.json
-  //   zip.file("scene.json", sceneJson);
-
-  //   // 👉 Add user-uploaded game assets reliably using stored File objects
-  //   const gameAssetsFolder = zip.folder("game-assets");
-
-  //   const usedAssets = this.inspector.AllObject.map((obj) => ({
-  //     file: obj.assetFile, // <-- Using directly stored File object now!
-  //     fileName: obj.assetSRC, // Optionally sanitize this if needed
-  //   }));
-
-  //   for (const asset of usedAssets) {
-  //     gameAssetsFolder!.file(asset.fileName, asset.file);
-  //   }
-
-  //   // 👉 Generate zip and trigger download
-  //   zip.generateAsync({ type: "blob" }).then((content) => {
-  //     saveAs(content, "my-pixi-game.zip");
-  //   });
-
-  //   alert("Build complete! Download should start.");
-  // }
+    // alert("Build complete! Download should start.");
+  }
 }

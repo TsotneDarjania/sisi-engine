@@ -6,6 +6,7 @@ import { AiOutlinePlaySquare } from "react-icons/ai";
 import { FaFileDownload } from "react-icons/fa";
 import useStore from "@/app/store";
 import { AssetType } from "@/enums/userEventEnums";
+import BuildSettingsComponent from "../buildSettingsComponent/BuildSettinsComponent";
 
 export default function SceneComponent() {
   const gameEngine = useStore((state) => state.gameEngine)!;
@@ -32,9 +33,10 @@ export default function SceneComponent() {
       return;
     }
 
-    const asset = JSON.parse( e.dataTransfer.getData("application/json")) as unknown as AssetType;
-    gameEngine.engineScene.droppedAsset(asset)
-
+    const asset = JSON.parse(
+      e.dataTransfer.getData("application/json")
+    ) as unknown as AssetType;
+    gameEngine.engineScene.droppedAsset(asset);
   };
 
   function handleFullScreen() {
@@ -64,6 +66,9 @@ export default function SceneComponent() {
         <div className=" z-10 flex items-center justify-center gap-2">
           {/* Play Icon */}
           <AiOutlinePlaySquare
+            onClick={() => {
+              gameEngine.playScene();
+            }}
             fontSize={"45px"}
             className=" text-white cursor-pointer z-10"
           />
@@ -93,11 +98,11 @@ export default function SceneComponent() {
             }}
             className="w-screen cursor-pointer h-screen fixed left-0 top-0 bg-black z-20 opacity-90"
           ></div>
-          {/* <BuildSettingsComponent
+          <BuildSettingsComponent
             gameEngine={gameEngine}
-            canvasWidth={gameEngine.canvas.clientWidth}
-            canvasHeight={gameEngine.canvas.clientHeight}
-          /> */}
+            canvasWidth={gameEngine.engineScene.canvas.width}
+            canvasHeight={gameEngine.engineScene.canvas.height}
+          />
         </>
       )}
     </main>

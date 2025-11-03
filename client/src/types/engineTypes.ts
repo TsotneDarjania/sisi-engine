@@ -2,7 +2,7 @@ import { ContainerChild } from "pixi.js";
 
 
 export type GameObjectType = {
-  type: string;
+  type: "image" | "video" | "audio";
   name: string;
   id : string
   gameObject: ContainerChild;
