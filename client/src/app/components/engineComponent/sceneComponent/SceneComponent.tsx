@@ -4,22 +4,28 @@ import { useEffect, useRef, useState } from "react";
 import { SlSizeFullscreen } from "react-icons/sl";
 import { AiOutlinePlaySquare } from "react-icons/ai";
 import { FaFileDownload } from "react-icons/fa";
+import { FaCircleStop } from "react-icons/fa6";
 import useStore from "@/app/store";
 import { AssetType } from "@/enums/userEventEnums";
 import BuildSettingsComponent from "../buildSettingsComponent/BuildSettinsComponent";
 
 export default function SceneComponent() {
   const gameEngine = useStore((state) => state.gameEngine)!;
-  const sceneDivRef = useRef<HTMLDivElement>(null);
-  const setupDoneRef = useRef(false); // <-- ref to guard setup
+  const editorDivRef = useRef<HTMLDivElement>(null);
+  const runtimeDivRef = useRef<HTMLDivElement>(null);
+  const playIconRef = useRef<HTMLDivElement>(null);
+  const stopIconRef = useRef<HTMLDivElement>(null);
+  const setupDineRef = useRef(false);
   const [isOpenBuildSettins, setIsOpenBuildSettings] = useState(false);
 
-  useEffect(() => {
-    if (setupDoneRef.current) return; // already set up
+  const mode = useRef<"editor" | "runtime">("editor");
 
-    setupDoneRef.current = true; // mark as done
+  useEffect(() => {
+    if (setupDineRef.current) return; // already set up
+
+    setupDineRef.current = true; // mark as done
     const setup = async () => {
-      await gameEngine.createScene(sceneDivRef.current!);
+      await gameEngine.createScene(editorDivRef.current!);
     };
     setup();
   }, []); // empty dependency array
@@ -40,13 +46,26 @@ export default function SceneComponent() {
   };
 
   function handleFullScreen() {
-    const el = sceneDivRef.current;
-    if (!el) return;
-    if (el.requestFullscreen) {
-      el.requestFullscreen().catch((err) => {
-        console.error("Fullscreen request failed:", err);
-        alert("Sorry Your Browser does not support full screen mode...");
-      });
+    if (mode.current === "editor") {
+      const el = editorDivRef.current;
+      if (!el) return;
+      if (el.requestFullscreen) {
+        el.requestFullscreen().catch((err) => {
+          console.error("Fullscreen request failed:", err);
+          alert("Sorry Your Browser does not support full screen mode...");
+        });
+      }
+    }
+
+    if (mode.current === "runtime") {
+      const runtime_el = runtimeDivRef.current;
+      if (!runtime_el) return;
+      if (runtime_el.requestFullscreen) {
+        runtime_el.requestFullscreen().catch((err) => {
+          console.error("Fullscreen request failed:", err);
+          alert("Sorry Your Browser does not support full screen mode...");
+        });
+      }
     }
   }
 
@@ -65,13 +84,35 @@ export default function SceneComponent() {
 
         <div className=" z-10 flex items-center justify-center gap-2">
           {/* Play Icon */}
-          <AiOutlinePlaySquare
-            onClick={() => {
-              gameEngine.playScene();
-            }}
-            fontSize={"45px"}
-            className=" text-white cursor-pointer z-10"
-          />
+          <div className="absolute right-[50px]" ref={playIconRef}>
+            <AiOutlinePlaySquare
+              onClick={() => {
+                mode.current = "runtime";
+                playIconRef.current!.style.visibility = "hidden";
+                stopIconRef.current!.style.visibility = "visible";
+                runtimeDivRef.current!.style.visibility = "visible";
+                gameEngine.playRuntimeGame()
+              }}
+              fontSize={"45px"}
+              className=" text-white cursor-pointer z-10"
+            />
+          </div>
+
+          {/* Stop Icon */}
+          <div className="absolute right-[50px]" style={{ visibility: "hidden" }} ref={stopIconRef}>
+            <FaCircleStop
+              onClick={() => {
+                mode.current = "editor";
+                playIconRef.current!.style.visibility = "visible";
+                runtimeDivRef.current!.style.visibility = "hidden";
+                stopIconRef.current!.style.visibility = "hidden";
+                gameEngine.stopRuntimeGame()
+              }}
+              fontSize={"45px"}
+              className=" text-white cursor-pointer z-10"
+            />
+          </div>
+
           {/* Full Screen Icon */}
           <SlSizeFullscreen
             onClick={handleFullScreen}
@@ -81,15 +122,24 @@ export default function SceneComponent() {
         </div>
       </div>
 
-      {/* Canvas Parent Div*/}
+      {/* Editor Div*/}
       <div
+        id="game-canvas-parent-element"
         className="w-full h-screen absolute top-0 left-0"
-        ref={sceneDivRef}
+        ref={editorDivRef}
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
       ></div>
 
-      {setupDoneRef && isOpenBuildSettins && (
+      {/* Runtime Div */}
+      <div
+        ref={runtimeDivRef}
+        style={{ visibility: "hidden" }}
+        id="runtime-game-parent-element"
+        className="w-full h-screen absolute top-0 left-0"
+      ></div>
+
+      {editorDivRef && isOpenBuildSettins && (
         <>
           {/* Shadow */}
           <div

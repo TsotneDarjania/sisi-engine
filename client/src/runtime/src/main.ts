@@ -15,35 +15,50 @@ export type GenerateBuildJSONType = {
   };
 };
 
-export function setupRuntime(json: GenerateBuildJSONType) {
-  const sceneBlob = new Blob([JSON.stringify(json)], {
-    type: "application/json",
-  });
-  const sceneBlobUrl = URL.createObjectURL(sceneBlob);
+let runtimeGame: RuntimeGame | null = null;
 
-  const popup = window.open(
-    `/engine/runtime?scene=${encodeURIComponent(sceneBlobUrl)}&w=${json.appElement.width}&h=${json.appElement.height}`,
-    "_blank",
-    `width=${json.appElement.width},height=${json.appElement.height},left=0,top=${window.innerHeight / 2},resizable=yes`
-  );
+export function playRuntime(json: GenerateBuildJSONType) {
+  const runtimeParentElement = document.getElementById(
+    "runtime-game-parent-element"
+  )! as HTMLDivElement;
 
-  if (!popup) {
-    // Popup may be blocked; show helpful info
-    alert("Please allow popups for this site to preview the runtime.");
-    return;
-  }
+  runtimeGame = new RuntimeGame(json, runtimeParentElement);
+
+  // const sceneBlob = new Blob([JSON.stringify(json)], {
+  //   type: "application/json",
+  // });
+  // const sceneBlobUrl = URL.createObjectURL(sceneBlob);
+
+  // const popup = window.open(
+  //   `/engine/runtime?scene=${encodeURIComponent(sceneBlobUrl)}&w=${json.appElement.width}&h=${json.appElement.height}`,
+  //   "_blank",
+  //   `width=${json.appElement.width},height=${json.appElement.height},left=0,top=${window.innerHeight / 2},resizable=yes`
+  // );
+
+  // if (!popup) {
+  //   // Popup may be blocked; show helpful info
+  //   alert("Please allow popups for this site to preview the runtime.");
+  //   return;
+  // }
 }
 
-export async function startRuntimeGame(parentDIV: HTMLDivElement) {
-  const sceneURL = new URLSearchParams(window.location.search).get("scene");
-  if (!sceneURL) throw Error("Scene JSON is undefined");
+export function stopRuntime() {
+  if (!runtimeGame) return;
 
-  const sceneJSON: GenerateBuildJSONType = await fetch(sceneURL).then((r) =>
-    r.json()
-  );
-
-  new RuntimeGame(sceneJSON, parentDIV);
+  runtimeGame.destroyGame()
+  runtimeGame = null;
 }
+
+// export async function startRuntimeGame(parentDIV: HTMLDivElement) {
+//   const sceneURL = new URLSearchParams(window.location.search).get("scene");
+//   if (!sceneURL) throw Error("Scene JSON is undefined");
+
+//   const sceneJSON: GenerateBuildJSONType = await fetch(sceneURL).then((r) =>
+//     r.json()
+//   );
+
+//   new RuntimeGame(sceneJSON, parentDIV);
+// }
 
 // function createSpriteTree(obj: any, parent: Container) {
 //   const texture = Texture.from(obj.src);

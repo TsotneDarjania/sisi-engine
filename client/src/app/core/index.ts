@@ -8,7 +8,7 @@ import { Signal } from "./state/signal";
 import EventManager from "./eventManager";
 import { GameObjectType } from "@/types/engineTypes";
 import { EventPayloads } from "@/enums/userEventEnums";
-import { setupRuntime } from "@/runtime/src/main";
+import { playRuntime, stopRuntime } from "@/runtime/src/main";
 
 export default class GameEngine {
   private _assets!: Assets;
@@ -73,21 +73,25 @@ export default class GameEngine {
     return this._engineScene;
   }
 
-  public playScene() {
+  public playRuntimeGame() {
     const sceneJson = this.builder.generateJSON(
       this.inspector.gameObjects,
       {
         backgroundColor: this.engineScene.backgroundColor,
       },
       {
-        width : this.engineScene.canvas.width,
-        height : this.engineScene.canvas.height,
-        isFullScreenWidth : false,
-        isFullScreenHeight : false,
+        width: this.engineScene.canvas.width,
+        height: this.engineScene.canvas.height,
+        isFullScreenWidth: false,
+        isFullScreenHeight: false,
       }
     );
 
-    setupRuntime(JSON.parse(sceneJson));
+    playRuntime(JSON.parse(sceneJson));
+  }
+
+  public stopRuntimeGame() {
+    stopRuntime();
   }
 
   public async build(
