@@ -15,7 +15,7 @@ export class RuntimeGame {
   }
 
   async init() {
-    console.log(this.sceneJSON);
+    console.log(this.sceneJSON, "SCENE JSON");
 
     //  Create APP
     const app = new Application();
@@ -35,7 +35,7 @@ export class RuntimeGame {
 
     await Promise.all(
       this.sceneJSON.objects.map((obj) => {
-         console.log(obj)
+        console.log(obj, "!!!!!!!!!!!!!!!");
         return Assets.load({
           alias: obj.id,
           src: obj.blobURL,

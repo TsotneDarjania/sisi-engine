@@ -5,23 +5,22 @@ export class Builder {
   private mapObjectToJSON(obj: GameObjectType): any {
     return {
       type: obj.type,
-      src: `/game-assets/${obj.blobURL}`,
-      childs: obj.childs.map((child) => this.mapObjectToJSON(child)), // ✅ recursion
-      data: {
-        x: obj.gameObject.x,
-        y: obj.gameObject.y,
-        scale: obj.gameObject.scale._x,
-        width: obj.gameObject.width,
-        height: obj.gameObject.height,
-        alpha: obj.gameObject.alpha,
-        isActive: obj.gameObject.visible,
-        anchor: [
-          (obj.gameObject as Sprite).anchor.x,
-          (obj.gameObject as Sprite).anchor.y,
-        ],
-        rotation: obj.gameObject.rotation,
+      name: obj.name,
+      id: obj.id,
+      sceneData: {
+        x: obj.sceneData.x,
+        y: obj.sceneData.y,
+        width: obj.sceneData.width,
+        height: obj.sceneData.height,
+        opacity: obj.sceneData.opacity,
+        isActive: obj.sceneData.isActive,
+        rotation: obj.sceneData.rotation,
+        ancor: obj.sceneData.ancor,
       },
       scene: obj.scene,
+      blobURL: obj.blobURL,
+
+      childs: obj.childs.map((child) => this.mapObjectToJSON(child)), // ✅ recursion
     };
   }
 
