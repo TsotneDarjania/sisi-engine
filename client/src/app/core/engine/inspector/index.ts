@@ -6,8 +6,8 @@ import {
   GameSceneEventEnums,
   InspectorEventEnums,
 } from "@/enums/userEventEnums";
-import { uid } from "@/helper";
-import { error } from "console";
+import { getNumericValue, uid } from "@/helper";
+
 
 export class Inspector {
   public gameObjects: Array<GameObjectType> = [];
@@ -105,7 +105,7 @@ export class Inspector {
         opacity: data.pixiObject.alpha,
         isActive: data.pixiObject.visible,
         rotation: data.pixiObject.rotation,
-        ancor: [data.pixiObject.pivot.x, data.pixiObject.pivot.y],
+        ancor: [0.5, 0.5],
       },
     });
   }
@@ -349,19 +349,6 @@ export class Inspector {
       throw new Error("targetObject is undefined");
     }
 
-    const getNumericValue = (
-      value: string | number,
-      fullSize: number
-    ): number => {
-      if (typeof value === "string" && value.trimEnd().endsWith("%")) {
-        const cleaned = value.trimEnd().replace(/\s+%$/, "%").slice(0, -1);
-        const percent = parseFloat(cleaned);
-        if (!isNaN(percent)) {
-          return (fullSize * percent) / 100;
-        }
-      }
-      return Number(value);
-    };
 
     // Apply all values from sceneData
     targetObj.sceneData = { ...sceneData };

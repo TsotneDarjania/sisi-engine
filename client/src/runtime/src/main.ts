@@ -16,17 +16,15 @@ export type GenerateBuildJSONType = {
 };
 
 export function setupRuntime(json: GenerateBuildJSONType) {
-
-  console.log(json,111111111)
   const sceneBlob = new Blob([JSON.stringify(json)], {
     type: "application/json",
   });
   const sceneBlobUrl = URL.createObjectURL(sceneBlob);
 
   const popup = window.open(
-    `/engine/runtime?scene=${encodeURIComponent(sceneBlobUrl)}`,
+    `/engine/runtime?scene=${encodeURIComponent(sceneBlobUrl)}&w=${json.appElement.width}&h=${json.appElement.height}`,
     "_blank",
-    `width=${json.appElement.width},height=${json.appElement.height},left=${0},top=${window.innerHeight / 2},resizable=yes`
+    `width=${json.appElement.width},height=${json.appElement.height},left=0,top=${window.innerHeight / 2},resizable=yes`
   );
 
   if (!popup) {
@@ -43,7 +41,6 @@ export async function startRuntimeGame(parentDIV: HTMLDivElement) {
   const sceneJSON: GenerateBuildJSONType = await fetch(sceneURL).then((r) =>
     r.json()
   );
-
 
   new RuntimeGame(sceneJSON, parentDIV);
 }

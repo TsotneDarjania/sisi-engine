@@ -9,6 +9,17 @@ export default function Runtime() {
   useEffect(() => {
     if (!gameDIV.current) throw Error("Game Div is undefined");
 
+    // Pull width/height from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const width = Number(urlParams.get("w")) || window.innerWidth;
+    const height = Number(urlParams.get("h")) || window.innerHeight;
+
+    // Apply size dynamically
+    gameDIV.current.style.width = `${width}px`;
+    gameDIV.current.style.height = `${height}px`;
+
+    console.log("Runtime canvas sized:", width, height);
+
     startRuntimeGame(gameDIV.current);
   }, []);
 
@@ -18,8 +29,7 @@ export default function Runtime() {
         position: "absolute",
         left: 0,
         top: 0,
-        width: "100vw",
-        height: "100vh",
+        background: "black",
       }}
       id="runtime-canvas"
       ref={gameDIV}

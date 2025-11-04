@@ -26,7 +26,7 @@ export type UserEventEnums =
 export type AssetType = {
   name: string;
   id: string;
-  type: "unknown" | "image" | "video";
+  type: "image" | "video" | "audio";
   blobURL: string;
 };
 

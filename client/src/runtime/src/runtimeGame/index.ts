@@ -1,6 +1,7 @@
 import { Application, Assets, Sprite, Texture } from "pixi.js";
 import { GenerateBuildJSONType } from "../main";
 import { GameObjectType } from "../../../types/engineTypes";
+import { getNumericValue } from "../../../helper";
 
 export class RuntimeGame {
   app!: Application;
@@ -18,13 +19,13 @@ export class RuntimeGame {
     console.log(this.sceneJSON, "SCENE JSON");
 
     //  Create APP
-    const app = new Application();
-    await app.init({
+    this.app = new Application();
+    await this.app.init({
       background: this.sceneJSON.canvas.backgroundColor,
       resizeTo: this.parentDIV,
     });
 
-    this.parentDIV.appendChild(app.canvas);
+    this.parentDIV.appendChild(this.app.canvas);
 
     await this.loadAssets();
     this.initGameObjects();
@@ -35,10 +36,10 @@ export class RuntimeGame {
 
     await Promise.all(
       this.sceneJSON.objects.map((obj) => {
-        console.log(obj, "!!!!!!!!!!!!!!!");
         return Assets.load({
           alias: obj.id,
           src: obj.blobURL,
+          loadParser: "loadTextures",
         });
       })
     );
@@ -59,11 +60,14 @@ export class RuntimeGame {
     const texture = Texture.from(obj.id);
     const sprite = new Sprite(texture);
 
-    sprite.x = Number(obj.sceneData.x);
-    sprite.y = Number(obj.sceneData.y);
-    sprite.width = Number(obj.sceneData.width);
-    sprite.height = Number(obj.sceneData.height);
-    sprite.alpha = Number(obj.sceneData.opacity);
+    sprite.x = getNumericValue(obj.sceneData.x, this.app.canvas.width);
+    sprite.y = getNumericValue(obj.sceneData.y, this.app.canvas.height);
+    sprite.width = getNumericValue(obj.sceneData.width, this.app.canvas.width);
+    sprite.height = getNumericValue(
+      obj.sceneData.height,
+      this.app.canvas.height
+    );
+    sprite.alpha = obj.sceneData.opacity;
     sprite.visible = obj.sceneData.isActive;
     sprite.anchor.set(obj.sceneData.ancor[0], obj.sceneData.ancor[1]);
     sprite.rotation = obj.sceneData.rotation;
