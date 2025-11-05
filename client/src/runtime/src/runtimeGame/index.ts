@@ -1,4 +1,4 @@
-import { Application, Assets, Sprite, Texture } from "pixi.js";
+import { Application, Assets, Sprite, Texture, Container } from "pixi.js";
 import { GenerateBuildJSONType } from "../main";
 import { GameObjectType } from "../../../types/engineTypes";
 import { getNumericValue } from "../../../helper";
@@ -6,8 +6,8 @@ import { getNumericValue } from "../../../helper";
 export class RuntimeGame {
   app!: Application;
 
-  gameObjects: GameObjectType[] = [];
-  displayObjectsMap = new Map<string, Sprite>();
+  /** Only real nodes from JSON: id -> Sprite (images only) */
+  private nodeMap = new Map<string, Sprite>();
 
   constructor(
     public sceneJSON: GenerateBuildJSONType,
@@ -16,118 +16,141 @@ export class RuntimeGame {
     this.init();
   }
 
-  async init() {
-    console.log(this.sceneJSON, "SCENE JSON");
+  // ---------- lifecycle ----------
 
-    // Create APP
+  private async init() {
     this.app = new Application();
     await this.app.init({
       background: this.sceneJSON.canvas.backgroundColor,
       resizeTo: this.parentDIV,
     });
-
     this.parentDIV.appendChild(this.app.canvas);
 
     await this.loadAssets();
-    this.initGameObjects();
 
-    // Listen for resize events
-    this.app.renderer.on("resize", this.onGameResize.bind(this));
+    // Build ONLY what exists in JSON (no dummy containers)
+    this.buildSpritesRecursive(this.sceneJSON.objects, this.app.stage);
+
+    // Initial layout relative to canvas
+    this.layoutAllRelativeToCanvas();
+
+    // Resize
+    this.app.renderer.on("resize", this.onGameResize);
+  }
+
+  // ---------- assets ----------
+
+  private flatten(objects: GameObjectType[]): GameObjectType[] {
+    const out: GameObjectType[] = [];
+    const walk = (arr: GameObjectType[]) => {
+      for (const o of arr) {
+        out.push(o);
+        if (o.childs?.length) walk(o.childs);
+      }
+    };
+    walk(objects);
+    return out;
   }
 
   private async loadAssets() {
     await Assets.init();
+    const all = this.flatten(this.sceneJSON.objects);
 
     await Promise.all(
-      this.sceneJSON.objects.map((obj) => {
-        return Assets.load({
-          alias: obj.id,
-          src: obj.blobURL,
-          loadParser: "loadTextures",
-        });
+      all.map((obj) => {
+        if (obj.type === "image" && obj.blobURL) {
+          return Assets.load({
+            alias: obj.id,
+            src: obj.blobURL,
+            loadParser: "loadTextures",
+          });
+        }
+        return Promise.resolve();
       })
     );
-
-    console.log("✅ All assets loaded");
   }
 
-  private initGameObjects() {
-    this.sceneJSON.objects.forEach((obj) => {
-      switch (obj.type) {
-        case "image":
-          this.addImage(obj);
+  // ---------- build (no extra containers) ----------
+
+  /**
+   * Create Sprites for "image" nodes only.
+   * If parent is a Sprite, attach as child; otherwise attach to stage.
+   * For non-image nodes, we don't create anything—just keep walking children.
+   */
+  private buildSpritesRecursive(objects: GameObjectType[], parent: Container) {
+    for (const obj of objects) {
+      let attachTo: Container = parent;
+
+      if (obj.type === "image") {
+        const tex = Texture.from(obj.id);
+        const sprite = new Sprite(tex);
+
+        // JSON-driven static props
+        sprite.visible = obj.sceneData.isActive;
+        sprite.alpha = obj.sceneData.opacity;
+        sprite.rotation = obj.sceneData.rotation;
+        sprite.anchor.set(obj.sceneData.ancor[0], obj.sceneData.ancor[1]);
+
+        // Keep for later updates
+        this.nodeMap.set(obj.id, sprite);
+
+        // Attach to parent
+        parent.addChild(sprite);
+
+        // Children (if any) will attach to THIS sprite
+        attachTo = sprite;
       }
-    });
+
+      // Recurse into children regardless of whether we created a sprite
+      if (obj.childs?.length) {
+        this.buildSpritesRecursive(obj.childs, attachTo);
+      }
+    }
   }
 
-  private addImage(obj: GameObjectType) {
-    const texture = Texture.from(obj.id);
-    const sprite = new Sprite(texture);
+  // ---------- layout (always canvas-relative) ----------
 
-    sprite.x = getNumericValue(obj.sceneData.x, this.app.canvas.width);
-    sprite.y = getNumericValue(obj.sceneData.y, this.app.canvas.height);
-    sprite.width = getNumericValue(obj.sceneData.width, this.app.canvas.width);
-    sprite.height = getNumericValue(
-      obj.sceneData.height,
-      this.app.canvas.height
-    );
-    sprite.alpha = obj.sceneData.opacity;
-    sprite.visible = obj.sceneData.isActive;
-    sprite.anchor.set(obj.sceneData.ancor[0], obj.sceneData.ancor[1]);
-    sprite.rotation = obj.sceneData.rotation;
+  private layoutAllRelativeToCanvas() {
+    const w = this.app.canvas.width;
+    const h = this.app.canvas.height;
 
-    this.app.stage.addChild(sprite);
-    this.displayObjectsMap.set(obj.id, sprite);
+    const walk = (arr: GameObjectType[]) => {
+      for (const obj of arr) {
+        const sprite = this.nodeMap.get(obj.id);
+        if (sprite) {
+          sprite.x = getNumericValue(obj.sceneData.x, w);
+          sprite.y = getNumericValue(obj.sceneData.y, h);
+          sprite.width = getNumericValue(obj.sceneData.width, w);
+          sprite.height = getNumericValue(obj.sceneData.height, h);
+        }
+        if (obj.childs?.length) walk(obj.childs);
+      }
+    };
 
-    console.log("🖼️ Image Added with ID:", obj.id);
+    walk(this.sceneJSON.objects);
   }
 
-  private onGameResize() {
-    const canvasWidth = this.app.canvas.width;
-    const canvasHeight = this.app.canvas.height;
+  private onGameResize = () => {
+    this.layoutAllRelativeToCanvas();
+  };
 
-    this.sceneJSON.objects.forEach((obj) => {
-      const sprite = this.displayObjectsMap.get(obj.id);
-      if (!sprite) return;
-
-      // Update position and size
-      sprite.x = getNumericValue(obj.sceneData.x, canvasWidth);
-      sprite.y = getNumericValue(obj.sceneData.y, canvasHeight);
-      sprite.width = getNumericValue(obj.sceneData.width, canvasWidth);
-      sprite.height = getNumericValue(obj.sceneData.height, canvasHeight);
-    });
-
-    console.log("🔁 Game resized and objects updated");
-  }
+  // ---------- destroy ----------
 
   public destroyGame() {
-    console.log("🗑️ Destroying game...");
-
-    // 1. Destroy all display objects and clear the map
-    this.displayObjectsMap.forEach((sprite) => {
-      // Destroy the sprite and its Texture object
-      sprite.destroy({ children: true, texture: true } as any);
-
-      // Also destroy the underlying base texture/source if still alive
-      const tex = sprite.texture;
-      if (tex && !tex.destroyed) {
-        try {
-          tex.destroy(true); // `true` => also destroy base/source
-        } catch {
-          /* ignore if already destroyed */
-        }
+    // Destroy sprites we created (safe but optional since app.destroy(true) cascades)
+    this.nodeMap.forEach((sprite) => {
+      try {
+        sprite.destroy({ children: true, texture: true });
+      } catch {
+        /* ignore */
       }
     });
-    this.displayObjectsMap.clear();
+    this.nodeMap.clear();
 
-    // 2. Destroy Pixi Application (also destroys canvas if `true`)
     if (this.app) {
-      this.app.destroy(true); // `true` removes canvas & event listeners
+      this.app.destroy(true); // also removes canvas & listeners
     }
 
-    // 4. Clear reference to Application (avoid memory leaks)
     this.app = null as unknown as Application;
-
-    console.log("✅ Game destroyed and resources cleaned up");
   }
 }
