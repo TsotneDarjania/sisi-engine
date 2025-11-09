@@ -1,5 +1,5 @@
 "use client";
-import InspectorObjectComponent from "./components/inspectorObjectComponent";
+import InspectorObjectComponent from "./components/object";
 import useStore from "@/app/store";
 import { useEffect, useState } from "react";
 import { GameObjectType } from "@/types/engineTypes";

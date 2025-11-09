@@ -4,7 +4,7 @@ import { FiBox } from "react-icons/fi";
 import { IoMdMove } from "react-icons/io";
 import { MdDeleteForever } from "react-icons/md";
 
-export default function InspectorObjectIndicators({
+export default function Indicators({
   object,
   toggle,
   deleteObject,

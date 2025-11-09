@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { FaArrowRight } from "react-icons/fa";
-import InspectorObjectComponent from "../inspectorObjectComponent";
+import InspectorObjectComponent from "../..";
 import { Sprite } from "pixi.js";
 import { GameObjectParameterType, GameObjectType } from "@/types/engineTypes";
 

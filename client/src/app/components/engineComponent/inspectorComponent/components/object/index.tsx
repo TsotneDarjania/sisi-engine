@@ -1,24 +1,8 @@
-import InspectorObjectIndicators from "../indicators";
-import PropertiesComponent from "../propterties";
 import { useState } from "react";
 import useStore from "@/app/store";
-import { GameObjectParameterType, GameObjectType } from "@/types/engineTypes";
-
-// handleDrop: (
-//   e: React.DragEvent<HTMLLIElement>,
-//   parentObject: InspectorObjectType
-// ) => void;
-
-// function isChildAlreadyNested(
-//   parent: InspectorObjectType,
-//   targetName: string
-// ): boolean {
-//   for (const child of parent.childs) {
-//     if (child.name === targetName) return true;
-//     if (isChildAlreadyNested(child, targetName)) return true;
-//   }
-//   return false;
-// }
+import { GameObjectType } from "@/types/engineTypes";
+import Indicators from "./components/indicators";
+import { Parameters } from "./components/parameters";
 
 export default function InspectorObjectComponent({
   object,
@@ -34,19 +18,8 @@ export default function InspectorObjectComponent({
   }
 
   function deleteObject(id: string) {
-      gameEngine.inspector.deleteGameObject(id)
+    gameEngine.inspector.deleteGameObject(id);
   }
-
-  const changeObjectParameter = (
-    parameter: GameObjectParameterType,
-    id: string,
-    value: string | number | boolean | [number, number]
-  ) => {
-    gameEngine.inspector.changeObjectParameter(id, {
-      parameter,
-      value
-    });
-  };
 
   const handleDrop = (e: React.DragEvent<HTMLLIElement>) => {
     e.preventDefault();
@@ -60,7 +33,7 @@ export default function InspectorObjectComponent({
       return;
     }
 
-    gameEngine.inspector.combineObject(childObjectID, object.id)
+    gameEngine.inspector.combineObject(childObjectID, object.id);
   };
 
   return (
@@ -74,20 +47,16 @@ export default function InspectorObjectComponent({
         object.childs.length > 0 ? "bg-gray-800" : "bg-gray-900"
       }`}
     >
-      <InspectorObjectIndicators
+      {/* Indicators */}
+      <Indicators
         deleteObject={deleteObject}
         toggle={toggle}
         object={object}
         isOpen={isOpen}
       />
 
-      {/* Inspector Components */}
-      {isOpen && (
-        <PropertiesComponent
-          changeObjectParameter={changeObjectParameter}
-          obj={object}
-        />
-      )}
+      {/* Properties */}
+      {isOpen && <Parameters gameEngine={gameEngine} object={object} />}
     </li>
   );
 }

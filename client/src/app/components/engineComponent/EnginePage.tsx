@@ -6,11 +6,15 @@ import InspectorComponent from "./inspectorComponent/InspectorComponent";
 import { useEffect, useRef, useState } from "react";
 import GameEngine from "@/app/core";
 import useStore from "@/app/store";
+import AddEventInterface from "./inspectorComponent/components/addEventIntInterface";
 
 export default function EngineComponent() {
   const gameEngine = useStore((state) => state.gameEngine);
   const setGameEngine = useStore((state) => state.setGameEngine);
 
+  const addEventInterfaceState = useStore(
+    (state) => state.addEventInterfaceState
+  );
 
   useEffect(() => {
     const engine = new GameEngine();
@@ -29,6 +33,9 @@ export default function EngineComponent() {
       <SceneComponent />
       {/* Inspector */}
       <InspectorComponent />
+
+      {/* UI Interfaces */}
+      {addEventInterfaceState.isOpen && <AddEventInterface />}
     </div>
   );
 }
