@@ -11,6 +11,10 @@ export default function AddEventInterface() {
   );
 
   const state = useStore((state) => state.addEventInterfaceState);
+  const gameEngine = useStore((state) => state.gameEngine);
+
+
+  const globalGameObjects = gameEngine?.inspector.gameObjects!.filter(g => g.id !== state.gameObject!.id)
 
   const [isLocalChagesOpen, setIsLocalChagnesOpen] = useState(false);
   const [isGlobalChagesOpen, setIsGlobalChagnesOpen] = useState(false);
@@ -61,7 +65,7 @@ export default function AddEventInterface() {
               <p className=" text-yellow-300 w-full">
                 {state.gameObject?.name}
               </p>
-              <Properties />
+              <Properties object={state.gameObject!} />
             </>
           )}
 
@@ -85,10 +89,11 @@ export default function AddEventInterface() {
           {isGlobalChagesOpen && (
             <div className=" w-full flex flex-col">
               {/* Object */}
-              <GlobalGameObject />
-              <GlobalGameObject />
-              <GlobalGameObject />
-          
+              {globalGameObjects!.map((gameObject) => {
+                return (
+                  <GlobalGameObject key={gameObject.id} object={gameObject} />
+                );
+              })}
             </div>
           )}
         </div>
