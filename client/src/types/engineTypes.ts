@@ -1,11 +1,13 @@
 import { ContainerChild } from "pixi.js";
 
-
 export type GameObjectType = {
-  type: "image" | "video" | "audio";
+  type: "image" | "video" | "audio" | "unknown";
   name: string;
-  id : string
+  id: string;
   gameObject: ContainerChild;
+  events: {
+    [K in GameObjectEventName]: Array<GameObjectEventActionType<unknown>>;
+  };
   sceneData: {
     x: string;
     y: string;
@@ -20,6 +22,19 @@ export type GameObjectType = {
   blobURL: string;
   childs: GameObjectType[];
 };
+
+export type GameObjectEventType<T> = {
+  eventName: GameObjectEventName;
+  action: GameObjectEventActionType<T>
+};
+
+export type GameObjectEventActionType<T> = {
+  propertyKey : keyof GameObjectType["sceneData"],
+  oldValue: T;
+  newValue: T;
+};
+
+export type GameObjectEventName = "onClick" | "mouseOver" | "mouseUp";
 
 export type ChangeOpbjectDataType = {
   parameter: GameObjectParameterType;

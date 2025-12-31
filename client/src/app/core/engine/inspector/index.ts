@@ -1,13 +1,16 @@
 import { ContainerChild, Sprite } from "pixi.js";
 import EventManager from "../../eventManager";
-import { ChangeOpbjectDataType, GameObjectType } from "@/types/engineTypes";
+import {
+  ChangeOpbjectDataType,
+  GameObjectEventType,
+  GameObjectType,
+} from "@/types/engineTypes";
 import {
   AssetType,
   GameSceneEventEnums,
   InspectorEventEnums,
 } from "@/enums/userEventEnums";
 import { getNumericValue, uid } from "@/helper";
-
 
 export class Inspector {
   public gameObjects: Array<GameObjectType> = [];
@@ -97,6 +100,11 @@ export class Inspector {
       scene: "testScene",
       blobURL: data.asset.blobURL,
       childs: [],
+      events: {
+        onClick: [],
+        mouseOver: [],
+        mouseUp: [],
+      },
       sceneData: {
         x: String(data.pixiObject.x),
         y: String(data.pixiObject.y),
@@ -108,6 +116,41 @@ export class Inspector {
         ancor: [0.5, 0.5],
       },
     });
+  }
+
+  public addEventToGameObject<ActionValueType>(
+    id: string,
+    event: GameObjectEventType<ActionValueType>
+  ) {
+    if (event.action.oldValue === event.action.newValue) {
+      console.warn(
+        `nothing was changed, because new value is same as old (old:${event.action.oldValue} new:old:${event.action.newValue})`
+      );
+      return;
+    }
+
+    const targetGameObject = this.findObjectByID(id);
+    if (!targetGameObject) {
+      console.error(`Can not Find Target Gameobject With ID:${id}`);
+      return;
+    }
+
+    const eventActions = (targetGameObject.events[event.eventName] ??= []);
+
+    const existingPropertyAction = eventActions.find(
+      (a) => a.propertyKey === event.action.propertyKey
+    );
+
+    if (existingPropertyAction) {
+      Object.assign(existingPropertyAction, event.action);
+    } else {
+      eventActions.push(event.action);
+    }
+
+
+    this.events.emit(InspectorEventEnums.addEventOrChangeToGameObject,event)
+
+    console.log(targetGameObject.events, "Add Or Change GameObject Event")
   }
 
   public deleteGameObject(id: string) {
@@ -348,7 +391,6 @@ export class Inspector {
     if (!targetObj) {
       throw new Error("targetObject is undefined");
     }
-
 
     // Apply all values from sceneData
     targetObj.sceneData = { ...sceneData };

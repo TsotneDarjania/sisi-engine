@@ -1,3 +1,4 @@
+import { GameObjectEventType } from "@/types/engineTypes";
 import { ContainerChild } from "pixi.js";
 
 export enum AssetEventEnums {
@@ -16,6 +17,7 @@ export enum InspectorEventEnums {
   changeObject = "changeObject",
   combineObjects = "combineObjects",
   removeFromParent = "removeFromParent",
+  addEventOrChangeToGameObject = "addEventOrChangeToGameObject"
 }
 
 export type UserEventEnums =
@@ -26,7 +28,7 @@ export type UserEventEnums =
 export type AssetType = {
   name: string;
   id: string;
-  type: "image" | "video" | "audio";
+  type: "image" | "video" | "audio" | "unknown";
   blobURL: string;
 };
 
@@ -46,6 +48,7 @@ export type EventPayloads = {
     objectId: string;
     changes: Record<string, any>;
   };
+  [InspectorEventEnums.addEventOrChangeToGameObject] : GameObjectEventType<unknown>;
   [InspectorEventEnums.deleteGameObject]: string;
   [InspectorEventEnums.combineObjects]: { parentID: string; childID: string };
   [InspectorEventEnums.removeFromParent]: { childID: string };

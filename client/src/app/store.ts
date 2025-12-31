@@ -1,9 +1,7 @@
 // store.ts
 import { create } from "zustand";
 import GameEngine from "@/app/core";
-import { GameObjectType } from "@/types/engineTypes";
-
-type EventType = "onClick" | "mouseOver" | "mouseUp";
+import { GameObjectEventName, GameObjectEventType, GameObjectType } from "@/types/engineTypes";
 
 type StoreState = {
   gameEngine: GameEngine | null;
@@ -12,12 +10,12 @@ type StoreState = {
   addEventInterfaceState: {
     isOpen: boolean;
     gameObject: GameObjectType | null;
-    eventType: EventType | null;
+    eventName: GameObjectEventName | null;
   };
   setIsAddEventPopupOpen: (state: {
     isOpen: boolean;
     gameObject: GameObjectType | null;
-    eventType: EventType | null;
+    eventName:  GameObjectEventName | null;
   }) => void;
 };
 
@@ -28,12 +26,12 @@ const useStore = create<StoreState>((set) => ({
   addEventInterfaceState: {
     isOpen: false,
     gameObject: null,
-    eventType: null,
+    eventName: null,
   },
 
-  setIsAddEventPopupOpen: ({ isOpen, gameObject, eventType }) =>
+  setIsAddEventPopupOpen: ({ isOpen, gameObject, eventName }) =>
     set({
-      addEventInterfaceState: { isOpen, gameObject, eventType },
+      addEventInterfaceState: { isOpen, gameObject, eventName },
     }),
 }));
 

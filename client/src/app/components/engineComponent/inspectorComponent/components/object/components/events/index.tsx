@@ -28,17 +28,29 @@ export default function Events({ gameObject }: { gameObject: GameObjectType }) {
               setIsAddEvnetPopupOpen({
                 isOpen: true,
                 gameObject: gameObject,
-                eventType: "onClick",
+                eventName: "onClick",
               });
             }}
             className=" border-1 border-dotted border-white cursor-pointer"
           >
             onClick
           </p>
-          <p className=" border-1 border-dotted border-white cursor-pointer">
+          <p onClick={() => {
+              setIsAddEvnetPopupOpen({
+                isOpen: true,
+                gameObject: gameObject,
+                eventName: "mouseOver",
+              });
+            }}  className=" border-1 border-dotted border-white cursor-pointer">
             onMouseOver
           </p>
-          <p className=" border-1 border-dotted border-white cursor-pointer">
+          <p onClick={() => {
+              setIsAddEvnetPopupOpen({
+                isOpen: true,
+                gameObject: gameObject,
+                eventName: "mouseUp",
+              });
+            }} className=" border-1 border-dotted border-white cursor-pointer">
             onMouseUp
           </p>
         </li>

@@ -3,7 +3,7 @@ import { IoAddCircleOutline } from "react-icons/io5";
 
 import { useEffect, useRef, useState } from "react";
 import useStore from "@/app/store";
-import { AssetComponent } from "./assetComponent/AssetComponent";
+import { AssetComponent } from "./components/asset/AssetComponent";
 import { AssetEventEnums, AssetType } from "@/enums/userEventEnums";
 
 export default function AssetsComponent() {

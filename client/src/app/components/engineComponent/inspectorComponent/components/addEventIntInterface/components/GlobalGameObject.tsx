@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { FaArrowRight } from "react-icons/fa";
 import { Properties } from "./Properties";
-import { GameObjectType } from "@/types/engineTypes";
+import { GameObjectEventName, GameObjectEventType, GameObjectType } from "@/types/engineTypes";
 
-export function GlobalGameObject({object} : {object : GameObjectType}) {
+export function GlobalGameObject({object, eventName} : {object : GameObjectType, eventName : GameObjectEventName}) {
   const [isPropertiesOPen, setIsPropertiesOpen] = useState(false);
 
   return (
@@ -21,7 +21,7 @@ export function GlobalGameObject({object} : {object : GameObjectType}) {
           }`}
         />
       </div>
-      {isPropertiesOPen && <Properties object={object} />}
+      {isPropertiesOPen && <Properties eventName={eventName} object={object} />}
        <div className=" w-full h-1 border-2 border-yellow-600 border-dotted"></div>
     </div>
   );
