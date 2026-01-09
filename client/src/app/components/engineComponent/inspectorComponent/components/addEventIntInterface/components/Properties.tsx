@@ -139,7 +139,7 @@ export function Properties({
       <div className="w-full flex justify-between">
         <p className=""> Rotation : </p>
         <input
-         onChange={(e) => {
+          onChange={(e) => {
             const newValue = Number(e.currentTarget.value);
 
             if (Number.isNaN(newValue)) {
@@ -169,11 +169,53 @@ export function Properties({
         <p className=""> Ancor : </p>
         <div className=" w-[200px] flex">
           <input
+            onChange={(e) => {
+              const newValue = Number(e.currentTarget.value);
+
+              if (Number.isNaN(newValue)) {
+                console.warn("Please Input Correct Number Value");
+                return;
+              }
+
+              if (debounceRef.current) clearTimeout(debounceRef.current);
+
+              debounceRef.current = setTimeout(() => {
+                gameEngine!.inspector.addEventToGameObject(object.id, {
+                  eventName,
+                  action: {
+                    propertyKey: "ancor",
+                    oldValue: object.sceneData.ancor[0],
+                    newValue: newValue,
+                  },
+                });
+              }, 400);
+            }}
             defaultValue={object.gameObject.pivot.x}
             className="border-2 w-[100px] border-white "
             type="text"
           />
           <input
+          onChange={(e) => {
+              const newValue = Number(e.currentTarget.value);
+
+              if (Number.isNaN(newValue)) {
+                console.warn("Please Input Correct Number Value");
+                return;
+              }
+
+              if (debounceRef.current) clearTimeout(debounceRef.current);
+
+              debounceRef.current = setTimeout(() => {
+                gameEngine!.inspector.addEventToGameObject(object.id, {
+                  eventName,
+                  action: {
+                    propertyKey: "ancor",
+                    oldValue: object.sceneData.ancor[1],
+                    newValue: newValue,
+                  },
+                });
+              }, 400);
+            }}
             defaultValue={object.gameObject.pivot.y}
             className="border-2 w-[100px] border-white "
             type="text"
@@ -183,7 +225,7 @@ export function Properties({
       <div className="w-full flex justify-between">
         <p className=""> Opacity : </p>
         <input
-         onChange={(e) => {
+          onChange={(e) => {
             const newValue = Number(e.currentTarget.value);
 
             if (Number.isNaN(newValue)) {
@@ -212,6 +254,29 @@ export function Properties({
       <div className="w-full flex justify-between">
         <p className=""> Visible : </p>
         <input
+        onChange={(e) => {
+              const newValue = e.currentTarget.checked;
+
+              if (Number.isNaN(newValue)) {
+                console.warn("Please Input Correct Number Value");
+                return;
+              }
+
+              console.log(newValue)
+
+              if (debounceRef.current) clearTimeout(debounceRef.current);
+
+              debounceRef.current = setTimeout(() => {
+                gameEngine!.inspector.addEventToGameObject(object.id, {
+                  eventName,
+                  action: {
+                    propertyKey: "isActive",
+                    oldValue: object.sceneData.isActive,
+                    newValue: newValue,
+                  },
+                });
+              }, 400);
+            }}
           defaultChecked={object.gameObject.visible}
           className=" w-[200px] border-2 border-white "
           type="checkbox"

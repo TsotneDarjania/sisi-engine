@@ -122,12 +122,12 @@ export class Inspector {
     id: string,
     event: GameObjectEventType<ActionValueType>
   ) {
-    if (event.action.oldValue === event.action.newValue) {
-      console.warn(
-        `nothing was changed, because new value is same as old (old:${event.action.oldValue} new:old:${event.action.newValue})`
-      );
-      return;
-    }
+    // if (event.action.oldValue === event.action.newValue) {
+    //   console.warn(
+    //     `nothing was changed, because new value is same as old (old:${event.action.oldValue} new:old:${event.action.newValue})`
+    //   );
+    //   return;
+    // }
 
     const targetGameObject = this.findObjectByID(id);
     if (!targetGameObject) {
@@ -147,10 +147,9 @@ export class Inspector {
       eventActions.push(event.action);
     }
 
+    this.events.emit(InspectorEventEnums.addEventOrChangeToGameObject, event);
 
-    this.events.emit(InspectorEventEnums.addEventOrChangeToGameObject,event)
-
-    console.log(targetGameObject.events, "Add Or Change GameObject Event")
+    console.log(targetGameObject.events, "Add Or Change GameObject Event");
   }
 
   public deleteGameObject(id: string) {
@@ -167,12 +166,8 @@ export class Inspector {
 
   public changeObjectParameter(id: string, data: ChangeOpbjectDataType) {
     const targetObj = this.findObjectByID(id);
+    if (!targetObj) throw new Error("targetObject is undefined");
 
-    if (!targetObj) {
-      throw new Error("targetObject is undefined");
-    }
-
-    // Helper function to support % values
     const getNumericValue = (
       value: string | number,
       fullSize: number
@@ -180,76 +175,110 @@ export class Inspector {
       if (typeof value === "string" && value.trimEnd().endsWith("%")) {
         const cleaned = value.trimEnd().replace(/\s+%$/, "%").slice(0, -1);
         const percent = parseFloat(cleaned);
-        if (!isNaN(percent)) {
-          return (fullSize * percent) / 100;
-        }
+        if (!isNaN(percent)) return (fullSize * percent) / 100;
       }
       return Number(value);
     };
 
+    // helper that updates ONLY oldValue for a specific sceneData key
+    const writeOldValueIntoEvents = (
+      propertyKey: keyof GameObjectType["sceneData"],
+      oldValue: unknown
+    ) => {
+      (
+        Object.keys(targetObj.events) as Array<keyof typeof targetObj.events>
+      ).forEach((eventKey) => {
+        targetObj.events[eventKey] = targetObj.events[eventKey].map(
+          (action) => {
+            if (action.propertyKey !== propertyKey) return action;
+            return { ...action, oldValue }; // ✅ newValue untouched
+          }
+        );
+      });
+      console.log(targetObj.events);
+    };
+
     switch (data.parameter) {
-      case "x":
+      case "x": {
         targetObj.sceneData.x = String(data.value);
         targetObj.gameObject.x = getNumericValue(
           String(data.value),
           this._canvas.width
         );
+        writeOldValueIntoEvents("x", targetObj.sceneData.x);
         break;
+      }
 
-      case "y":
+      case "y": {
         targetObj.sceneData.y = String(data.value);
         targetObj.gameObject.y = getNumericValue(
           String(data.value),
           this._canvas.height
         );
+        writeOldValueIntoEvents("y", targetObj.sceneData.y);
         break;
+      }
 
-      case "width":
+      case "width": {
         targetObj.sceneData.width = String(data.value);
         targetObj.gameObject.width = getNumericValue(
           String(data.value),
           this._canvas.width
         );
+        writeOldValueIntoEvents("width", targetObj.sceneData.width);
         break;
+      }
 
-      case "height":
+      case "height": {
         targetObj.sceneData.height = String(data.value);
         targetObj.gameObject.height = getNumericValue(
           String(data.value),
           this._canvas.height
         );
+        writeOldValueIntoEvents("height", targetObj.sceneData.height);
         break;
+      }
 
-      case "opacity":
+      case "opacity": {
         targetObj.sceneData.opacity = Number(data.value);
         targetObj.gameObject.alpha = Number(data.value);
+        writeOldValueIntoEvents("opacity", targetObj.sceneData.opacity);
         break;
+      }
 
-      case "visible":
+      case "visible": {
         targetObj.sceneData.isActive = Boolean(data.value);
         targetObj.gameObject.visible = Boolean(data.value);
+        writeOldValueIntoEvents("isActive", targetObj.sceneData.isActive);
         break;
+      }
 
-      case "rotation":
+      case "rotation": {
         targetObj.sceneData.rotation = Number(data.value);
         targetObj.gameObject.rotation = Number(data.value);
+        writeOldValueIntoEvents("rotation", targetObj.sceneData.rotation);
         break;
+      }
 
-      case "ancor_x":
+      case "ancor_x": {
         targetObj.sceneData.ancor[0] = data.value as number;
         (targetObj.gameObject as Sprite).anchor.set(
           targetObj.sceneData.ancor[0],
           targetObj.sceneData.ancor[1]
         );
+        writeOldValueIntoEvents("ancor", [...targetObj.sceneData.ancor] as [number, number]);
         break;
+      }
 
-      case "ancor_y":
+      case "ancor_y": {
         targetObj.sceneData.ancor[1] = data.value as number;
         (targetObj.gameObject as Sprite).anchor.set(
           targetObj.sceneData.ancor[0],
           targetObj.sceneData.ancor[1]
         );
+        writeOldValueIntoEvents("ancor", [...targetObj.sceneData.ancor] as [number, number]);
         break;
+      }
 
       default:
         console.error("Unknown Parameter:", data.parameter);

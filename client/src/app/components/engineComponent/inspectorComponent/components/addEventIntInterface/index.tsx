@@ -165,7 +165,10 @@ export default function AddEventInterface() {
               <div className="w-full flex-col flex justify-between text-white gap-1">
                 {localEvents?.map((event, i) => {
                   return (
-                    <div className="w-full flex justify-between text-white" key={i}>
+                    <div
+                      className="w-full flex justify-between text-white"
+                      key={i}
+                    >
                       <p className="text-green-500"> {event.propertyKey} : </p>
                       <div
                         className="w-[200px] h-[30px]
@@ -173,8 +176,13 @@ export default function AddEventInterface() {
                    p-2 flex justify-start items-center
                   "
                       >
-                        <p className="text-yellow-500">{event.oldValue as any} / <span className="text-green-500"> {event.newValue as any} </span> </p>
-                        
+                        <p className="text-yellow-500">
+                          {String(event.oldValue)} /{" "}
+                          <span className="text-green-500">
+                            {" "}
+                            {String(event.newValue)}{" "}
+                          </span>{" "}
+                        </p>
                       </div>
                     </div>
                   );
@@ -183,7 +191,66 @@ export default function AddEventInterface() {
             </>
           )}
 
-          <p className="text-white  w-full">Global Changes: </p>
+          <div className=" w-full flex justify-between mt-1">
+            <p className="text-white  w-full">Global Changes: </p>
+            <FaArrowRight
+              onClick={() => {
+                setIsGloabalChangesOpenForUfter((prev) => !prev);
+              }}
+              fontSize={"21px"}
+              className={`text-white mr-2 cursor-pointer transition-all ${
+                isGlobalChangesOpenForUfter ? "rotate-90" : ""
+              }`}
+            />
+          </div>
+
+          {/* Local Changes Object */}
+          {isGlobalChangesOpenForUfter && (
+            <>
+              <div className="w-full flex-col flex justify-between text-white gap-1">
+                {globalGameObjects?.map((obj, i) => {
+                  return (
+                    <div
+                      className="w-full flex flex-col justify-between text-white"
+                      key={i}
+                    >
+                      <p className=" text-yellow-300 w-full">
+                        {obj.name}
+                      </p>
+
+                      {obj.events[state.eventName!].map((event, i) => {
+                        return (
+                          <div
+                            className="w-full flex justify-between text-white mt-1"
+                            key={i}
+                          >
+                            <p className="text-green-500">
+                              {" "}
+                              {event.propertyKey} :{" "}
+                            </p>
+                            <div
+                              className="w-[200px] h-[30px]
+                        border-2 border-green-500
+                         p-2 flex justify-start items-center
+                        "
+                            >
+                              <p className="text-yellow-500">
+                                {String(event.oldValue)} /{" "}
+                                <span className="text-green-500">
+                                  {" "}
+                                  {String(event.newValue)}
+                                </span>{" "}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
