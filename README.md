@@ -1,4 +1,4 @@
-# 🎮 sisi-engine
+# 🎮 tatuka-engine
 
 A modular, browser-native game engine built for creators who want full control over scene management, asset workflows, and rendering. Built with TypeScript, Express, MongoDB, and PixiJS (currently), it’s designed to support real-time editing, runtime asset playback, and scalable architecture for games or interactive media apps.
 
