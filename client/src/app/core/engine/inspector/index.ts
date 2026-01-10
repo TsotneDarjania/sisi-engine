@@ -104,6 +104,7 @@ export class Inspector {
         onClick: [],
         mouseOver: [],
         mouseUp: [],
+        mouseLeave: [],
       },
       sceneData: {
         x: String(data.pixiObject.x),
@@ -266,7 +267,10 @@ export class Inspector {
           targetObj.sceneData.ancor[0],
           targetObj.sceneData.ancor[1]
         );
-        writeOldValueIntoEvents("ancor", [...targetObj.sceneData.ancor] as [number, number]);
+        writeOldValueIntoEvents("ancor", [...targetObj.sceneData.ancor] as [
+          number,
+          number,
+        ]);
         break;
       }
 
@@ -276,7 +280,10 @@ export class Inspector {
           targetObj.sceneData.ancor[0],
           targetObj.sceneData.ancor[1]
         );
-        writeOldValueIntoEvents("ancor", [...targetObj.sceneData.ancor] as [number, number]);
+        writeOldValueIntoEvents("ancor", [...targetObj.sceneData.ancor] as [
+          number,
+          number,
+        ]);
         break;
       }
 

@@ -34,7 +34,7 @@ export type GameObjectEventActionType<T> = {
   newValue: T;
 };
 
-export type GameObjectEventName = "onClick" | "mouseOver" | "mouseUp";
+export type GameObjectEventName = "onClick" | "mouseOver" | "mouseLeave" | "mouseUp";
 
 export type ChangeOpbjectDataType = {
   parameter: GameObjectParameterType;

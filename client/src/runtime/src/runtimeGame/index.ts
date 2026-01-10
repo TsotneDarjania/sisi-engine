@@ -28,6 +28,7 @@ export class RuntimeGame {
 
     await this.loadAssets();
 
+    console.log("Scene JSON : ", this.sceneJSON);
     // Build ONLY what exists in JSON (no dummy containers)
     this.buildSpritesRecursive(this.sceneJSON.objects, this.app.stage);
 
@@ -90,6 +91,168 @@ export class RuntimeGame {
         sprite.alpha = obj.sceneData.opacity;
         sprite.rotation = obj.sceneData.rotation;
         sprite.anchor.set(obj.sceneData.ancor[0], obj.sceneData.ancor[1]);
+
+        if (!obj.events) return;
+        // add Events
+        Object.keys(obj.events).forEach((event) => {
+          const eventkey = event as keyof typeof obj.events;
+          obj.events[eventkey].forEach((event) => {
+            sprite.interactive = true;
+
+            if (eventkey === "onClick") {
+              sprite.on("pointerdown", () => {
+                const w = this.app.canvas.width;
+                const h = this.app.canvas.height;
+
+                switch (event.propertyKey) {
+                  case "x":
+                    sprite.x = getNumericValue(event.newValue as string, w);
+                    break;
+                  case "y":
+                    sprite.y = getNumericValue(event.newValue as string, h);
+                    break;
+                  case "ancor":
+                    sprite.anchor.x = event.newValue as any[0] as number;
+                    sprite.anchor.y = event.newValue as any[1] as number;
+                    break;
+                  case "width":
+                    sprite.width = getNumericValue(event.newValue as string, w);
+                    break;
+                  case "height":
+                    sprite.height = getNumericValue(
+                      event.newValue as string,
+                      h
+                    );
+                    break;
+                  case "isActive":
+                    sprite.visible = event.newValue as boolean;
+                    break;
+                  case "opacity":
+                    sprite.alpha = event.newValue as number;
+                    break;
+                  case "rotation":
+                    sprite.rotation = event.newValue as number;
+                    break;
+                }
+              });
+            }
+
+            if (eventkey === "mouseOver") {
+              sprite.on("pointerover", () => {
+                const w = this.app.canvas.width;
+                const h = this.app.canvas.height;
+
+                switch (event.propertyKey) {
+                  case "x":
+                    console.log(getNumericValue(event.newValue as string, w));
+                    sprite.x = getNumericValue(event.newValue as string, w);
+                    break;
+                  case "y":
+                    sprite.y = getNumericValue(event.newValue as string, h);
+                    break;
+                  case "ancor":
+                    sprite.anchor.x = event.newValue as any[0] as number;
+                    sprite.anchor.y = event.newValue as any[1] as number;
+                    break;
+                  case "width":
+                    sprite.width = getNumericValue(event.newValue as string, w);
+                    break;
+                  case "height":
+                    sprite.height = getNumericValue(
+                      event.newValue as string,
+                      h
+                    );
+                    break;
+                  case "isActive":
+                    sprite.visible = event.newValue as boolean;
+                    break;
+                  case "opacity":
+                    sprite.alpha = event.newValue as number;
+                    break;
+                  case "rotation":
+                    sprite.rotation = event.newValue as number;
+                    break;
+                }
+              });
+            }
+
+            if (eventkey === "mouseLeave") {
+              sprite.on("mouseleave", () => {
+                const w = this.app.canvas.width;
+                const h = this.app.canvas.height;
+
+                switch (event.propertyKey) {
+                  case "x":
+                    sprite.x = getNumericValue(event.newValue as string, w);
+                    break;
+                  case "y":
+                    sprite.y = getNumericValue(event.newValue as string, h);
+                    break;
+                  case "ancor":
+                    sprite.anchor.x = event.newValue as any[0] as number;
+                    sprite.anchor.y = event.newValue as any[1] as number;
+                    break;
+                  case "width":
+                    sprite.width = getNumericValue(event.newValue as string, w);
+                    break;
+                  case "height":
+                    sprite.height = getNumericValue(
+                      event.newValue as string,
+                      h
+                    );
+                    break;
+                  case "isActive":
+                    sprite.visible = event.newValue as boolean;
+                    break;
+                  case "opacity":
+                    sprite.alpha = event.newValue as number;
+                    break;
+                  case "rotation":
+                    sprite.rotation = event.newValue as number;
+                    break;
+                }
+              });
+            }
+
+            if (eventkey === "mouseUp") {
+              sprite.on("pointerup", () => {
+                const w = this.app.canvas.width;
+                const h = this.app.canvas.height;
+                
+                switch (event.propertyKey) {
+                  case "x":
+                    sprite.x = getNumericValue(event.newValue as string, w);
+                    break;
+                  case "y":
+                    sprite.y = getNumericValue(event.newValue as string, h);
+                    break;
+                  case "ancor":
+                    sprite.anchor.x = event.newValue as any[0] as number;
+                    sprite.anchor.y = event.newValue as any[1] as number;
+                    break;
+                  case "width":
+                    sprite.width = getNumericValue(event.newValue as string, w);
+                    break;
+                  case "height":
+                    sprite.height = getNumericValue(
+                      event.newValue as string,
+                      h
+                    );
+                    break;
+                  case "isActive":
+                    sprite.visible = event.newValue as boolean;
+                    break;
+                  case "opacity":
+                    sprite.alpha = event.newValue as number;
+                    break;
+                  case "rotation":
+                    sprite.rotation = event.newValue as number;
+                    break;
+                }
+              });
+            }
+          });
+        });
 
         // Keep for later updates
         this.nodeMap.set(obj.id, sprite);

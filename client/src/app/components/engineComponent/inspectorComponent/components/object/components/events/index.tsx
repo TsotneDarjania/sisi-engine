@@ -48,6 +48,15 @@ export default function Events({ gameObject }: { gameObject: GameObjectType }) {
               setIsAddEvnetPopupOpen({
                 isOpen: true,
                 gameObject: gameObject,
+                eventName: "mouseLeave",
+              });
+            }}  className=" border-1 border-dotted border-white cursor-pointer">
+            onMouseLeave
+          </p>
+          <p onClick={() => {
+              setIsAddEvnetPopupOpen({
+                isOpen: true,
+                gameObject: gameObject,
                 eventName: "mouseUp",
               });
             }} className=" border-1 border-dotted border-white cursor-pointer">

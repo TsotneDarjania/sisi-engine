@@ -24,12 +24,7 @@ export function Properties({
         <p className=""> pos X : </p>
         <input
           onChange={(e) => {
-            const newValue = Number(e.currentTarget.value);
-
-            if (Number.isNaN(newValue)) {
-              console.warn("Please Input Correct Number Value");
-              return;
-            }
+            const newValue = e.currentTarget.value;
 
             if (debounceRef.current) clearTimeout(debounceRef.current);
 
@@ -38,7 +33,7 @@ export function Properties({
                 eventName,
                 action: {
                   propertyKey: "x",
-                  oldValue: object.gameObject.x,
+                  oldValue: String(object.gameObject.x),
                   newValue: newValue,
                 },
               });
@@ -53,12 +48,7 @@ export function Properties({
         <p className=""> pos Y : </p>
         <input
           onChange={(e) => {
-            const newValue = Number(e.currentTarget.value);
-
-            if (Number.isNaN(newValue)) {
-              console.warn("Please Input Correct Number Value");
-              return;
-            }
+            const newValue = e.currentTarget.value;
 
             if (debounceRef.current) clearTimeout(debounceRef.current);
 
@@ -67,7 +57,7 @@ export function Properties({
                 eventName,
                 action: {
                   propertyKey: "y",
-                  oldValue: object.gameObject.y,
+                  oldValue: String(object.gameObject.y),
                   newValue: newValue,
                 },
               });
@@ -82,12 +72,7 @@ export function Properties({
         <p className=""> Width : </p>
         <input
           onChange={(e) => {
-            const newValue = Number(e.currentTarget.value);
-
-            if (Number.isNaN(newValue)) {
-              console.warn("Please Input Correct Number Value");
-              return;
-            }
+            const newValue = e.currentTarget.value;
 
             if (debounceRef.current) clearTimeout(debounceRef.current);
 
@@ -96,7 +81,7 @@ export function Properties({
                 eventName,
                 action: {
                   propertyKey: "width",
-                  oldValue: object.gameObject.width,
+                  oldValue: String(object.gameObject.width),
                   newValue: newValue,
                 },
               });
@@ -111,12 +96,7 @@ export function Properties({
         <p className=""> Height : </p>
         <input
           onChange={(e) => {
-            const newValue = Number(e.currentTarget.value);
-
-            if (Number.isNaN(newValue)) {
-              console.warn("Please Input Correct Number Value");
-              return;
-            }
+            const newValue = e.currentTarget.value;
 
             if (debounceRef.current) clearTimeout(debounceRef.current);
 
@@ -125,7 +105,7 @@ export function Properties({
                 eventName,
                 action: {
                   propertyKey: "height",
-                  oldValue: object.gameObject.height,
+                  oldValue: String(object.gameObject.height),
                   newValue: newValue,
                 },
               });
@@ -140,12 +120,7 @@ export function Properties({
         <p className=""> Rotation : </p>
         <input
           onChange={(e) => {
-            const newValue = Number(e.currentTarget.value);
-
-            if (Number.isNaN(newValue)) {
-              console.warn("Please Input Correct Number Value");
-              return;
-            }
+            const newValue = e.currentTarget.value;
 
             if (debounceRef.current) clearTimeout(debounceRef.current);
 
@@ -154,7 +129,7 @@ export function Properties({
                 eventName,
                 action: {
                   propertyKey: "rotation",
-                  oldValue: object.gameObject.rotation,
+                  oldValue: String(object.gameObject.rotation),
                   newValue: newValue,
                 },
               });
@@ -170,12 +145,7 @@ export function Properties({
         <div className=" w-[200px] flex">
           <input
             onChange={(e) => {
-              const newValue = Number(e.currentTarget.value);
-
-              if (Number.isNaN(newValue)) {
-                console.warn("Please Input Correct Number Value");
-                return;
-              }
+              const newValue = e.currentTarget.value;
 
               if (debounceRef.current) clearTimeout(debounceRef.current);
 
@@ -184,24 +154,19 @@ export function Properties({
                   eventName,
                   action: {
                     propertyKey: "ancor",
-                    oldValue: object.sceneData.ancor[0],
+                    oldValue: String(object.sceneData.ancor[0]),
                     newValue: newValue,
                   },
                 });
               }, 400);
             }}
-            defaultValue={object.gameObject.pivot.x}
+            defaultValue={object.sceneData.ancor[0]}
             className="border-2 w-[100px] border-white "
             type="text"
           />
           <input
-          onChange={(e) => {
-              const newValue = Number(e.currentTarget.value);
-
-              if (Number.isNaN(newValue)) {
-                console.warn("Please Input Correct Number Value");
-                return;
-              }
+            onChange={(e) => {
+              const newValue = e.currentTarget.value;
 
               if (debounceRef.current) clearTimeout(debounceRef.current);
 
@@ -210,13 +175,13 @@ export function Properties({
                   eventName,
                   action: {
                     propertyKey: "ancor",
-                    oldValue: object.sceneData.ancor[1],
+                    oldValue: String(object.sceneData.ancor[1]),
                     newValue: newValue,
                   },
                 });
               }, 400);
             }}
-            defaultValue={object.gameObject.pivot.y}
+            defaultValue={object.sceneData.ancor[1]}
             className="border-2 w-[100px] border-white "
             type="text"
           />
@@ -226,12 +191,7 @@ export function Properties({
         <p className=""> Opacity : </p>
         <input
           onChange={(e) => {
-            const newValue = Number(e.currentTarget.value);
-
-            if (Number.isNaN(newValue)) {
-              console.warn("Please Input Correct Number Value");
-              return;
-            }
+            const newValue = e.currentTarget.value;
 
             if (debounceRef.current) clearTimeout(debounceRef.current);
 
@@ -240,7 +200,7 @@ export function Properties({
                 eventName,
                 action: {
                   propertyKey: "opacity",
-                  oldValue: object.gameObject.alpha,
+                  oldValue: String(object.gameObject.alpha),
                   newValue: newValue,
                 },
               });
@@ -254,29 +214,24 @@ export function Properties({
       <div className="w-full flex justify-between">
         <p className=""> Visible : </p>
         <input
-        onChange={(e) => {
-              const newValue = e.currentTarget.checked;
+          onChange={(e) => {
+            const newValue = e.currentTarget.checked;
 
-              if (Number.isNaN(newValue)) {
-                console.warn("Please Input Correct Number Value");
-                return;
-              }
+            console.log(newValue);
 
-              console.log(newValue)
+            if (debounceRef.current) clearTimeout(debounceRef.current);
 
-              if (debounceRef.current) clearTimeout(debounceRef.current);
-
-              debounceRef.current = setTimeout(() => {
-                gameEngine!.inspector.addEventToGameObject(object.id, {
-                  eventName,
-                  action: {
-                    propertyKey: "isActive",
-                    oldValue: object.sceneData.isActive,
-                    newValue: newValue,
-                  },
-                });
-              }, 400);
-            }}
+            debounceRef.current = setTimeout(() => {
+              gameEngine!.inspector.addEventToGameObject(object.id, {
+                eventName,
+                action: {
+                  propertyKey: "isActive",
+                  oldValue: object.sceneData.isActive,
+                  newValue: newValue,
+                },
+              });
+            }, 400);
+          }}
           defaultChecked={object.gameObject.visible}
           className=" w-[200px] border-2 border-white "
           type="checkbox"

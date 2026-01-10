@@ -7,6 +7,7 @@ export class Builder {
       type: obj.type,
       name: obj.name,
       id: obj.id,
+      events: obj.events,
       sceneData: {
         x: obj.sceneData.x,
         y: obj.sceneData.y,
@@ -19,7 +20,6 @@ export class Builder {
       },
       scene: obj.scene,
       blobURL: obj.blobURL,
-
       childs: obj.childs.map((child) => this.mapObjectToJSON(child)), // ✅ recursion
     };
   }
