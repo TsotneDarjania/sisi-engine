@@ -2,7 +2,7 @@ import { GameObjectType } from "@/types/engineTypes";
 import { FaArrowRight } from "react-icons/fa";
 import { FiBox } from "react-icons/fi";
 import { IoMdMove } from "react-icons/io";
-import { MdDeleteForever } from "react-icons/md";
+import { RiDeleteBin5Line } from "react-icons/ri";
 
 export default function Indicators({
   object,
@@ -16,7 +16,7 @@ export default function Indicators({
   isOpen: boolean;
 }) {
   return (
-    <header className="flex items-center justify-between gap-2">
+    <header className="flex items-center justify-between gap-2 text-gray-300 text-sm">
       <div className="flex items-center gap-2">
         <p>{object.type}</p>
         {object.childs.length > 0 && <FiBox fontSize={"25px"} />}
@@ -25,7 +25,7 @@ export default function Indicators({
       <p>{object.name}</p>
 
       {/* Controllers */}
-      <div className="flex justify-center items-center">
+      <div className="flex justify-center gap-1 items-center">
         {/* DragAndDrop Icon */}
         <div
           draggable
@@ -48,12 +48,12 @@ export default function Indicators({
           }`}
         />
         {/* Delete */}
-        <MdDeleteForever
+        <RiDeleteBin5Line 
           onClick={() => {
             deleteObject(object.id);
           }}
           className="cursor-pointer"
-          fontSize={"30px"}
+          fontSize={"23px"}
         />
       </div>
     </header>

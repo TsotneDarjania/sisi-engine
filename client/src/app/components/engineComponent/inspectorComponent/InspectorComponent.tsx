@@ -45,8 +45,8 @@ export default function InspectorComponent() {
   };
 
   return (
-    <aside className="flex items-center h-screen flex-col border-2 border-gray-700">
-      <header className="bg-gray-900 flex justify-center items-center border-white border-2 border-l-0 border-r-0 border-t-0 w-full p-4">
+    <aside className="flex items-center justce h-screen flex-col bg-gray-800 border-gray-700 border-2">
+      <header className="bg-[radial-gradient(ellipse_at_center,_#1b2436_0%,_#0b1020_55%,_#05070d_100%)] flex justify-center items-center  border-l-0 border-r-0 border-t-0 w-full p-4">
         <h2 className="text-xl custom-font-1 text-white ">Inspector</h2>
       </header>
 
@@ -55,7 +55,7 @@ export default function InspectorComponent() {
         onDrop={(e) => {
           handleDrop(e);
         }}
-        className="w-full h-full flex-grow  overflow-y-auto"
+        className="w-full h-full flex-grow flex flex-col items-center gap-2 mt-2  overflow-y-auto"
       >
         {gameObjects.map((object, index) => (
           <InspectorObjectComponent key={index} object={object} />

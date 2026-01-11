@@ -2,6 +2,7 @@ import { AssetType } from "@/enums/userEventEnums";
 import Image from "next/image";
 import { IoMdMove } from "react-icons/io";
 import { MdDeleteForever } from "react-icons/md";
+import { RiDeleteBin5Line } from "react-icons/ri";
 
 export function AssetComponent({
   asset,
@@ -13,11 +14,11 @@ export function AssetComponent({
   return (
     <li
       key={asset.name}
-      className="text-sm w-full truncate justify-between flex items-center border pt-2 pb-2 border-l-0 border-r-0 border-t-0"
+      className="text-sm bg-gray-700 w-[90%] h-[35px] p-2 truncate justify-between flex items-center border-1 rounded-sm border-gray-500 text-gray-400  "
     >
-      <div className=" gap-2 flex items-center h-full">
+      <div className=" gap-2 flex items-center">
         {/* Type */}
-        <p className=" text-gray-800 font-bold">{asset.type}</p>
+        <p className=" text-gray-400 font-bold">{asset.type}</p>
         {/* Name */}
         <p>{asset.name}</p>
         {/* Preview */}
@@ -41,8 +42,8 @@ export function AssetComponent({
       </div>
 
       {/* Controllers */}
-      <div className="flex items-center ">
-        {/* Move */}
+      <div className="flex items-center text-white   ">
+        {/* Move */}  
         <div
           draggable
           onDragStart={(e) => {
@@ -60,12 +61,12 @@ export function AssetComponent({
         </div>
 
         {/* Delete */}
-        <MdDeleteForever
+        <RiDeleteBin5Line 
           onClick={() => {
             deleteAsset(asset.id);
           }}
           className="cursor-pointer"
-          fontSize={"30px"}
+          fontSize={"24px"}
         />
       </div>
     </li>

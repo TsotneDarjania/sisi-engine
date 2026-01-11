@@ -43,8 +43,8 @@ export default function InspectorObjectComponent({
         handleDrop(e);
       }}
       key={object.name}
-      className={`border-2 border-white border-t-0 border-l-0 border-r-0 p-2   text-white ${
-        object.childs.length > 0 ? "bg-gray-800" : "bg-gray-900"
+      className={`border-2 w-[90%] border-gray-600 flex justify-between flex-col p-2 rounded-sm   text-white ${
+        object.childs.length > 0 ? " bg-gray-900" : "bg-gray-700"
       }`}
     >
       {/* Indicators */}
@@ -55,7 +55,7 @@ export default function InspectorObjectComponent({
         isOpen={isOpen}
       />
 
-      {/* Properties */}
+      {/* Parameters */}
       {isOpen && <Parameters gameEngine={gameEngine} object={object} />}
     </li>
   );

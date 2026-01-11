@@ -8,6 +8,7 @@ import { FaCircleStop } from "react-icons/fa6";
 import useStore from "@/app/store";
 import { AssetType } from "@/enums/userEventEnums";
 import BuildSettingsComponent from "../buildSettingsComponent/BuildSettinsComponent";
+import { CiPlay1 } from "react-icons/ci";
 
 export default function SceneComponent() {
   const gameEngine = useStore((state) => state.gameEngine)!;
@@ -70,22 +71,22 @@ export default function SceneComponent() {
   }
 
   return (
-    <main className="flex flex-col justify-start items-center pt-3 relative">
+    <main className="flex flex-col justify-start items-center pt-2 relative">
       {/* Interface */}
-      <div className="flex text-white  justify-between w-full items-center pl-4 pr-4">
+      <div className="flex text-white  justify-between w-full items-center pl-1 pr-2">
         {/* Donwload Icon */}
         <FaFileDownload
           onClick={() => {
             setIsOpenBuildSettings(true);
           }}
-          fontSize={"35px"}
+          fontSize={"30px"}
           className=" text-white cursor-pointer z-10"
         />
 
         <div className=" z-10 flex items-center justify-center gap-2">
           {/* Play Icon */}
-          <div className="absolute right-[50px]" ref={playIconRef}>
-            <AiOutlinePlaySquare
+          <div className="absolute right-[35px]" ref={playIconRef}>
+            <CiPlay1
               onClick={() => {
                 mode.current = "runtime";
                 playIconRef.current!.style.visibility = "hidden";
@@ -93,13 +94,13 @@ export default function SceneComponent() {
                 runtimeDivRef.current!.style.visibility = "visible";
                 gameEngine.playRuntimeGame()
               }}
-              fontSize={"45px"}
+              fontSize={"35px"}
               className=" text-white cursor-pointer z-10"
             />
           </div>
 
           {/* Stop Icon */}
-          <div className="absolute right-[50px]" style={{ visibility: "hidden" }} ref={stopIconRef}>
+          <div className="absolute right-[40px]" style={{ visibility: "hidden" }} ref={stopIconRef}>
             <FaCircleStop
               onClick={() => {
                 mode.current = "editor";
@@ -108,7 +109,7 @@ export default function SceneComponent() {
                 stopIconRef.current!.style.visibility = "hidden";
                 gameEngine.stopRuntimeGame()
               }}
-              fontSize={"45px"}
+              fontSize={"32px"}
               className=" text-white cursor-pointer z-10"
             />
           </div>
@@ -116,7 +117,7 @@ export default function SceneComponent() {
           {/* Full Screen Icon */}
           <SlSizeFullscreen
             onClick={handleFullScreen}
-            fontSize={"30px"}
+            fontSize={"25px"}
             className=" text-white cursor-pointer z-10"
           />
         </div>

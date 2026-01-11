@@ -10,7 +10,7 @@ export default function Events({ gameObject }: { gameObject: GameObjectType }) {
   );
 
   return (
-    <ul>
+    <ul className="mt-2">
       <li
         onClick={() => {
           setIsEventOptionsOpen((prev) => !prev);

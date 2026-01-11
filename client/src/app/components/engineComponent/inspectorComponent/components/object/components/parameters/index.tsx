@@ -4,6 +4,8 @@ import GameEngine from "@/app/core";
 import { FaArrowRight } from "react-icons/fa";
 import { useState } from "react";
 import Events from "../events";
+import { VscSettings } from "react-icons/vsc";
+import { GrAction } from "react-icons/gr";
 
 export function Parameters({
   gameEngine,
@@ -34,11 +36,15 @@ export function Parameters({
   }
 
   return (
-    <ul>
+    <ul className="flex flex-col gap-2">
       {/* Properties */}
-      <li className=" ml-2">
+      <li className=" text-sm border-2 border-gray-500 p-2 rounded-sm">
         <div className="  flex justify-between  ">
-          <h2 className="text-blue-400 font-semibold">Properties</h2>
+          <div className="flex justify-between items-center">
+            <VscSettings className="text-[25px]" />
+            <h2 className="text-white font-semibold "> (properties)</h2>
+          </div>
+
           <FaArrowRight
             onClick={() => {
               proeprtiesToggle();
@@ -58,9 +64,14 @@ export function Parameters({
       </li>
 
       {/* Events */}
-      <li className=" ml-2">
+      <li className="text-sm border-2 border-gray-500 p-2 rounded-sm">
         <div className="  flex justify-between  ">
-          <h2 className="text-blue-400 font-semibold">Events</h2>
+
+          <div className="flex justify-between items-center">
+            <GrAction className="text-[20px]" />
+            <h2 className="text-white font-semibold "> (events)</h2>
+          </div>
+
           <FaArrowRight
             onClick={() => {
               eventsToggle();

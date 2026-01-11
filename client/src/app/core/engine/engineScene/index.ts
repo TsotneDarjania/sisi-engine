@@ -10,7 +10,7 @@ export class EngineScene {
   private sceneIndicators!: SceneMenu;
   private sceneControllers!: SceneControllers;
 
-  private canvasBackgroundColor: string = "#101828";
+  private canvasBackgroundColor: string = "#030408";
 
   constructor(public events: EventManager) {}
 

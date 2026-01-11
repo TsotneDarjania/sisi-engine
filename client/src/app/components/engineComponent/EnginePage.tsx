@@ -33,7 +33,6 @@ export default function EngineComponent() {
       <SceneComponent />
       {/* Inspector */}
       <InspectorComponent />
-
       {/* UI Interfaces */}
       {addEventInterfaceState.isOpen && <AddEventInterface />}
     </div>
