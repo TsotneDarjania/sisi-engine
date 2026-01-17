@@ -24,10 +24,10 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
 
   return (
     <ul className="w-full text-white mt-3 transition-all">
-      <li className="flex justify-between">
+      <li className="flex justify-between  " >
         <label>Pos X :</label>
         <input
-          className="text-center border"
+          className="text-center border w-[55%]"
           defaultValue={props.obj.gameObject.x}
           type="string"
           onChange={(e) => {
@@ -42,7 +42,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
       <li className="flex justify-between">
         <label>Pos Y :</label>
         <input
-          className="text-center border"
+          className="text-center border w-[55%]"
           defaultValue={props.obj.gameObject.y}
           type="string"
           onChange={(e) => {
@@ -57,7 +57,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
       <li className="flex justify-between">
         <label>Width :</label>
         <input
-          className="text-center border"
+          className="text-center border w-[55%]"
           defaultValue={props.obj.gameObject.width}
           type="string"
           onChange={(e) => {
@@ -72,7 +72,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
       <li className="flex justify-between">
         <label>Height :</label>
         <input
-          className="text-center border"
+          className="text-center border w-[55%]"
           defaultValue={props.obj.gameObject.height}
           type="string"
           onChange={(e) => {
@@ -87,7 +87,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
       <li className="flex justify-between">
         <label>Rotation :</label>
         <input
-          className="text-center border"
+          className="text-center border w-[55%]"
           defaultValue={props.obj.gameObject.rotation}
           type="string"
           onChange={(e) => {
@@ -99,11 +99,11 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
           }}
         />
       </li>
-      <li className="flex justify-between">
+      <li className="flex justify-between ">
         <label>Ancor :</label>
-        <div className="flex items-center">
+        <div className="flex items-center w-[55%]">
           <input
-            className="text-center border  w-[103px]"
+            className="text-center border  w-[50%]"
             defaultValue={(props.obj.gameObject as Sprite).anchor.x}
             type="number"
             onChange={(e) => {
@@ -115,7 +115,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
             }}
           />
           <input
-            className="text-center border w-[103px]"
+            className="text-center border w-[50%]"
             defaultValue={(props.obj.gameObject as Sprite).anchor.y}
             type="number"
             onChange={(e) => {
@@ -131,7 +131,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
       <li className="flex justify-between">
         <label>Opacity :</label>
         <input
-          className="text-center border"
+          className="text-center border w-[55%]"
           defaultValue={props.obj.gameObject.alpha}
           type="number"
           onChange={(e) => {
@@ -146,7 +146,7 @@ export default function PropertiesComponent(props: PropertiesComponentType) {
       <li className="flex justify-between">
         <label>Visible :</label>
         <input
-          className="text-center border"
+          className="text-center border w-[55%]"
           defaultChecked={props.obj.gameObject.visible}
           type="checkbox"
           onChange={(e) => {

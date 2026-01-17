@@ -38,7 +38,7 @@ export function Parameters({
   return (
     <ul className="flex flex-col gap-2">
       {/* Properties */}
-      <li className=" text-sm border-2 border-gray-500 p-2 rounded-sm">
+      <li className=" text-lg border-2 border-gray-500 p-2 rounded-sm">
         <div className="  flex justify-between  ">
           <div className="flex justify-between items-center">
             <VscSettings className="text-[25px]" />
@@ -64,19 +64,19 @@ export function Parameters({
       </li>
 
       {/* Events */}
-      <li className="text-sm border-2 border-gray-500 p-2 rounded-sm">
+      <li className="text-lg border-2 border-gray-500 p-2 rounded-sm">
         <div className="  flex justify-between  ">
 
           <div className="flex justify-between items-center">
             <GrAction className="text-[20px]" />
-            <h2 className="text-white font-semibold "> (events)</h2>
+            <h2 className="text-white font-semibold ml-1 "> (events)</h2>
           </div>
 
           <FaArrowRight
             onClick={() => {
               eventsToggle();
             }}
-            fontSize={"21px"}
+            fontSize={"20px"}
             className={`cursor-pointer transition-all ${
               isEventsOpen ? "rotate-90" : ""
             }`}
